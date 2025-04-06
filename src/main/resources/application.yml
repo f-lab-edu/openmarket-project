@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: openmarket
+  datasource:
+    url: jdbc:mysql://localhost:13306/openmarket
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: admin@123
+  jpa:
+    hibernate:
+      ddl-auto: none
+
