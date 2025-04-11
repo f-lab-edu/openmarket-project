@@ -104,7 +104,7 @@ public class Users {
     }
 
     public UserDto toDto(){
-        return new UserDto(email, userName, phone, userRole, userStatus);
+        return new UserDto(userId, email, userName, phone, userRole, userStatus);
     }
 
     @Override

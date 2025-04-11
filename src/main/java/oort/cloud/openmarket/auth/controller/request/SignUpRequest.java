@@ -25,13 +25,6 @@ public class SignUpRequest {
 
     public SignUpRequest(){}
 
-    public SignUpRequest(String email, String password, String userName, String phone, UserRole userRole) {
-        this.email = email;
-        this.password = password;
-        this.userName = userName;
-        this.phone = phone;
-        this.userRole = userRole;
-    }
     public String getPassword() {return password;}
 
     public String getEmail() {
