@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import oort.cloud.openmarket.user.enums.UserRole;
+import oort.cloud.openmarket.user.enums.UserStatus;
 
 public class SignUpRequest {
     @Email(message = "올바른 이메일 형식이 아닙니다.")
@@ -21,6 +22,8 @@ public class SignUpRequest {
     private String phone;
     @NotNull(message = "유저 권한은 필수 값입니다.")
     private UserRole userRole;
+
+    public SignUpRequest(){}
 
     public String getPassword() {return password;}
 
