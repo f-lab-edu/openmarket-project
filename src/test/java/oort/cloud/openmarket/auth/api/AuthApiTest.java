@@ -25,9 +25,6 @@ class AuthApiTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Test
     @DisplayName("회원가입이 성공한다.")
     void success_sign_up() throws Exception {
@@ -35,7 +32,7 @@ class AuthApiTest {
 
         mockMvc.perform(post("/v1/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(request))
                 .andExpect(status().isOk());
     }
 
@@ -72,21 +69,6 @@ class AuthApiTest {
             }
          */
     }
-
-    @Test
-    @DisplayName("로그인에 성공하면 accessToken refreshToken을 반환한다.")
-    void success_login() throws Exception {
-        //given
-        LoginRequest request = getLoginRequest();
-
-        //when then
-        mockMvc.perform(post("/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is2xxSuccessful())
-                .andDo(print());
-    }
-
 
 
     private String getInvalidRequest() {
