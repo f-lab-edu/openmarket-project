@@ -1,5 +1,6 @@
 package oort.cloud.openmarket.auth.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +22,14 @@ public class JwtComponent {
     private final JwtProperties properties;
     private final Key secreteKey;
     private final Clock clock;
+    private final ObjectMapper objectMapper;
 
-    public JwtComponent(JwtProperties properties, Clock clock) {
+
+    public JwtComponent(JwtProperties properties, Clock clock, ObjectMapper objectMapper) {
         this.properties = properties;
         this.secreteKey = properties.getSecretKey();
         this.clock = clock;
+        this.objectMapper = objectMapper;
     }
 
     private String getRefreshToken(UserDto user){
@@ -42,6 +46,7 @@ public class JwtComponent {
                 .signWith(this.secreteKey)
                 .setSubject(String.valueOf(user.getUserId()))
                 .claim("email", user.getEmail())
+                .claim("userName", user.getUserName())
                 .claim("userRole", user.getUserRole())
                 .setExpiration(getExpireDate(properties.getAccessTokenExpiredTime()))
                 .compact();
@@ -72,6 +77,15 @@ public class JwtComponent {
         }catch (ExpiredJwtException e){
             throw new AuthServiceException(ErrorType.EXPIRED_TOKEN);
         }
+    }
+
+    public UserDto parseUserInfo(String accessToken){
+        Claims claims = Jwts.parserBuilder()
+                            .setSigningKey(this.secreteKey)
+                            .build()
+                            .parseClaimsJws(accessToken)
+                            .getBody();
+        return objectMapper.convertValue(claims, UserDto.class);
     }
 
     private Date getExpireDate(String expireTime){
