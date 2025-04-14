@@ -1,5 +1,6 @@
 package oort.cloud.openmarket.auth.component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -28,7 +29,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -46,7 +46,7 @@ class JwtComponentTest {
         when(jwtProperties.getAccessTokenExpiredTime()).thenReturn("30m"); // 30분
         when(jwtProperties.getRefreshTokenExpiredTime()).thenReturn("7d"); // 7일
         clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
-        jwtComponent = new JwtComponent(jwtProperties, clock);
+        jwtComponent = new JwtComponent(jwtProperties, clock, new ObjectMapper());
     }
 
     @Test
