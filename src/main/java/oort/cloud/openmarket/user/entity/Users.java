@@ -103,10 +103,6 @@ public class Users {
         return updatedAt;
     }
 
-    public UserDto toDto(){
-        return new UserDto(userId, email, userName, phone, userRole, userStatus);
-    }
-
     @Override
     public String toString() {
         return "Users{" +
