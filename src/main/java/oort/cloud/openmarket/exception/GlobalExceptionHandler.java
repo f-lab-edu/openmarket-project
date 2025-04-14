@@ -1,8 +1,9 @@
 package oort.cloud.openmarket.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import oort.cloud.openmarket.exception.response.InvalidParameterExceptionResponse;
-import oort.cloud.openmarket.exception.response.AuthExceptionResponse;
+import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.exception.response.RequestValidationErrorResponse;
+import oort.cloud.openmarket.exception.response.ApiExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,25 +17,24 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(AuthServiceException.class)
-    public ResponseEntity<AuthExceptionResponse> handleUserServiceException(AuthServiceException e){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new AuthExceptionResponse(e.getErrorType().getMessage(), e.getErrorType())
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiExceptionResponse> handleUserServiceException(BusinessException e){
+        return ResponseEntity.status(e.getErrorType().getStatus()).body(
+                ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
         );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<InvalidParameterExceptionResponse> handleInvalidParameter(MethodArgumentNotValidException e){
-        log.error("[Request] Exception Message : {} Class Name : {}", e.getMessage(), e.getClass().getName());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<RequestValidationErrorResponse> handleInvalidParameter(MethodArgumentNotValidException e){
+        return ResponseEntity.status(ErrorType.INVALID_PARAMETER.getStatus())
                 .body(
-                        new InvalidParameterExceptionResponse(getFieldErrorDetails(e), ErrorType.INVALID_PARAMETER)
+                        RequestValidationErrorResponse.of(getFieldErrorDetails(e), ErrorType.INVALID_PARAMETER)
                 );
     }
 
-    private List<InvalidParameterExceptionResponse.FieldErrorDetail> getFieldErrorDetails(MethodArgumentNotValidException e){
+    private List<RequestValidationErrorResponse.FieldErrorDetail> getFieldErrorDetails(MethodArgumentNotValidException e){
         return e.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> new InvalidParameterExceptionResponse.FieldErrorDetail(
+                .map(fieldError -> new RequestValidationErrorResponse.FieldErrorDetail(
                     fieldError.getField(),
                     fieldError.getDefaultMessage()
         )).collect(Collectors.toList());

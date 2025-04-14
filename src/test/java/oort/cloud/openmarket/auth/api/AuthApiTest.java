@@ -22,17 +22,14 @@ class AuthApiTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @Test
     @DisplayName("회원가입이 성공한다.")
     void success_sign_up() throws Exception {
-        SignUpRequest request = getRequest();
+        String request = getValidRequest();
 
         mockMvc.perform(post("/v1/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(request))
                 .andExpect(status().isOk());
     }
 
@@ -41,8 +38,6 @@ class AuthApiTest {
     void user_data_validation() throws Exception {
         //given
         String request = getInvalidRequest();
-
-
 
         //when then
         mockMvc.perform(post("/v1/auth/sign-up")
@@ -73,13 +68,16 @@ class AuthApiTest {
                 }
                 """;
     }
-    private SignUpRequest getRequest() {
-        return new SignUpRequest(
-                "test1@email.com",
-                "test123",
-                "test",
-                "12312341234",
-                UserRole.BUYER
-        );
+
+    private String getValidRequest() {
+        return """
+                {
+                    "email" : "test223@email.com",
+                    "password" : "1234",
+                    "userName" : "test",
+                    "phone" : "12341231234",
+                    "userRole" : "BUYER"
+                }
+                """;
     }
 }

@@ -1,25 +1,30 @@
 package oort.cloud.openmarket.exception.response;
 
 
-import oort.cloud.openmarket.exception.ErrorType;
+import oort.cloud.openmarket.exception.enums.ErrorType;
 
 import java.util.List;
 
-public class InvalidParameterExceptionResponse {
+public class RequestValidationErrorResponse {
     private List<FieldErrorDetail> errors;
-    private ErrorType exceptionType;
+    private ErrorType errorType;
 
-    public InvalidParameterExceptionResponse(List<FieldErrorDetail> errors, ErrorType exceptionType) {
-        this.errors = errors;
-        this.exceptionType = exceptionType;
+    public static RequestValidationErrorResponse of(List<FieldErrorDetail> errors, ErrorType exceptionType) {
+        RequestValidationErrorResponse response = new RequestValidationErrorResponse();
+        response.errors = errors;
+        response.errorType = exceptionType;
+        return response;
+    }
+
+    private RequestValidationErrorResponse() {
     }
 
     public List<FieldErrorDetail> getErrors() {
         return errors;
     }
 
-    public ErrorType getExceptionType() {
-        return exceptionType;
+    public ErrorType getErrorType() {
+        return errorType;
     }
 
     public static class FieldErrorDetail {

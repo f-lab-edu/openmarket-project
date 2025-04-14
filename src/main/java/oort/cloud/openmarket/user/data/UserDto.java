@@ -11,13 +11,17 @@ public class UserDto {
     private UserRole userRole;
     private UserStatus userStatus;
 
-    public UserDto(String email, String userName, String phone, UserRole userRole, UserStatus userStatus) {
-        this.email = email;
-        this.userName = userName;
-        this.phone = phone;
-        this.userRole = userRole;
-        this.userStatus = userStatus;
+    public static UserDto of(String email, String userName, String phone, UserRole userRole, UserStatus userStatus) {
+        UserDto userDto = new UserDto();
+        userDto.email = email;
+        userDto.userName = userName;
+        userDto.phone = phone;
+        userDto.userRole = userRole;
+        userDto.userStatus = userStatus;
+        return userDto;
     }
+
+    private UserDto() {}
 
     public String getEmail() {
         return email;
