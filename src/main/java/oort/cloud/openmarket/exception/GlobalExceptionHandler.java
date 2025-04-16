@@ -1,10 +1,11 @@
 package oort.cloud.openmarket.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import oort.cloud.openmarket.exception.auth.AuthenticationException;
+import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.exception.response.RequestValidationErrorResponse;
 import oort.cloud.openmarket.exception.response.ApiExceptionResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,7 +19,14 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ApiExceptionResponse> handleUserServiceException(BusinessException e){
+    public ResponseEntity<ApiExceptionResponse> handleBusinessException(BusinessException e){
+        return ResponseEntity.status(e.getErrorType().getStatus()).body(
+                ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiExceptionResponse> handleAuthenticationException(AuthenticationException e){
         return ResponseEntity.status(e.getErrorType().getStatus()).body(
                 ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
         );

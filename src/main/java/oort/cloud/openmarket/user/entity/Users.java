@@ -7,6 +7,7 @@ import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
@@ -28,9 +29,7 @@ public class Users {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    protected Users() {
-
-    }
+    protected Users() {}
 
     public static Users createUser(String email, String password, String userName, String phone, UserRole userRole){
         Users users = new Users();
@@ -101,6 +100,19 @@ public class Users {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Users users = (Users) o;
+        return Objects.equals(userId, users.userId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId);
     }
 
     @Override

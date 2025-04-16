@@ -2,7 +2,7 @@ package oort.cloud.openmarket.user.service;
 
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
 import oort.cloud.openmarket.data.SignUpRequestTest;
-import oort.cloud.openmarket.exception.auth.DuplicateEmailException;
+import oort.cloud.openmarket.exception.business.DuplicateEmailException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
