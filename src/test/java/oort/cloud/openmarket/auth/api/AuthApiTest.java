@@ -2,6 +2,7 @@ package oort.cloud.openmarket.auth.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import oort.cloud.openmarket.auth.controller.request.LoginRequest;
+import oort.cloud.openmarket.data.LoginRequestTest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
 import oort.cloud.openmarket.auth.request.LoginRequestTest;
 import oort.cloud.openmarket.auth.request.SignUpRequestTest;
@@ -28,7 +29,7 @@ class AuthApiTest {
     @Test
     @DisplayName("회원가입이 성공한다.")
     void success_sign_up() throws Exception {
-        SignUpRequest request = getSignUpRequest();
+        String request = getValidRequest();
 
         mockMvc.perform(post("/v1/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -69,6 +70,21 @@ class AuthApiTest {
             }
          */
     }
+
+    @Test
+    @DisplayName("로그인에 성공하면 accessToken refreshToken을 반환한다.")
+    void success_login() throws Exception {
+        //given
+        LoginRequest request = getLoginRequest();
+
+        //when then
+        mockMvc.perform(post("/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is2xxSuccessful())
+                .andDo(print());
+    }
+
 
 
     private String getInvalidRequest() {

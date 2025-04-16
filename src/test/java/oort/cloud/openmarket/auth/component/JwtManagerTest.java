@@ -1,16 +1,15 @@
 package oort.cloud.openmarket.auth.component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import oort.cloud.openmarket.auth.controller.response.AuthTokenResponse;
-import oort.cloud.openmarket.auth.jwt.JwtComponent;
-import oort.cloud.openmarket.auth.jwt.JwtProperties;
-import oort.cloud.openmarket.exception.AuthServiceException;
-import oort.cloud.openmarket.exception.ErrorType;
+import oort.cloud.openmarket.auth.data.AuthToken;
+import oort.cloud.openmarket.auth.data.AccessTokenPayload;
+import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
+import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
+import oort.cloud.openmarket.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
@@ -29,69 +28,68 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-class JwtComponentTest {
-
+class JwtManagerTest {
     @Mock
     private JwtProperties jwtProperties;
-    private JwtComponent jwtComponent;
+    private JwtManager jwtManager;
     private Clock clock;
     private final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 테스트용 키
-
     @BeforeEach
     void setup() {
         when(jwtProperties.getSecretKey()).thenReturn(secretKey);
-        when(jwtProperties.getAccessTokenExpiredTime()).thenReturn("30m"); // 30분
-        when(jwtProperties.getRefreshTokenExpiredTime()).thenReturn("7d"); // 7일
+        when(jwtProperties.accessTokenExpiredMinutes()).thenReturn(30); // 30분
+        when(jwtProperties.refreshTokenExpiredDay()).thenReturn(7); // 7일
         clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
-        jwtComponent = new JwtComponent(jwtProperties, clock, new ObjectMapper());
+        jwtManager = new JwtManager(jwtProperties, clock);
     }
 
     @Test
     @DisplayName("JWT Access 토큰 생성이 성공한다.")
     void success_create_jwt(){
         //given
-        UserDto userDto = new UserDto(1L, "test", "test", "1231412", UserRole.BUYER, UserStatus.ACTIVE);
+        UserDto userDto = getUserDto();
 
         //when
-        AuthTokenResponse authToken = jwtComponent.createAuthToken(userDto);
+        AuthToken authToken = jwtManager.createAuthToken(userDto);
         String accessToken = authToken.getAccessToken();
-        Jws<Claims> claimsJws = jwtComponent.validateToken(accessToken);
+        AccessTokenPayload parseUserPayload = jwtManager.getAccessTokenPayload(accessToken);
 
         //then
-        String sub = claimsJws.getBody().getSubject();
-        assertEquals(sub, String.valueOf(userDto.getUserId()));
+        assertEquals(parseUserPayload.getUserId(), userDto.getUserId());
     }
 
     @Test
-    @DisplayName("JWT 토큰 검증이 실패할 경우 AuthServiceException 예외를 던진다.")
+    @DisplayName("JWT 토큰 검증이 실패할 경우 InvalidTokenException 타입의 예외를 던진다.")
     void fail_validate_token(){
         //given
-        UserDto userDto = new UserDto(1L,
-                                    "test",
-                                    "test",
-                                    "1231412",
-                                    UserRole.BUYER,
-                                    UserStatus.ACTIVE);
+        UserDto user = getUserDto();
 
         //when
-        AuthTokenResponse authToken = jwtComponent.createAuthToken(userDto);
+        AuthToken authToken = jwtManager.createAuthToken(user);
         String accessToken = authToken.getAccessToken();
         String diffToken = accessToken.substring(0, 3) + "X" + accessToken.substring(4);
 
         //then
         String message =
-                Assertions.assertThrows(AuthServiceException.class, () -> jwtComponent.validateToken(diffToken)).getMessage();
+                Assertions.assertThrows(InvalidTokenException.class, () -> jwtManager.getAccessTokenPayload(diffToken)).getMessage();
         assertEquals(message, ErrorType.INVALID_TOKEN.getMessage());
+    }
+
+    private UserDto getUserDto() {
+        UserDto user = UserDto.of(1L, "test@email.com", "test",
+                "12312341234", UserRole.BUYER, UserStatus.ACTIVE);
+        return user;
     }
 
     @Test
     @DisplayName("Access Token의 만료 시간이 정확히 30분 뒤인지 확인")
     void accessToken_expiration_is_valid() {
-        UserDto user = getUserDto();
-        String accessToken = jwtComponent.createAuthToken(user).getAccessToken();
+        UserDto userDto = getUserDto();
+        String accessToken = jwtManager.createAuthToken(userDto).getAccessToken();
 
         Claims claims = extractClaims(accessToken);
         Date expiration = claims.getExpiration();
@@ -107,8 +105,8 @@ class JwtComponentTest {
     @Test
     @DisplayName("Refresh Token의 만료시간이 정확히 7일 이후")
     void refreshToken_has_longer_expiration() {
-        UserDto user = getUserDto();
-        AuthTokenResponse token = jwtComponent.createAuthToken(user);
+        UserDto userDto = getUserDto();
+        AuthToken token = jwtManager.createAuthToken(userDto);
 
         Claims refreshClaims = extractClaims(token.getRefreshToken());
         Date expiration = refreshClaims.getExpiration();
@@ -120,10 +118,14 @@ class JwtComponentTest {
         assertEquals(expectedExpiration, expiration.toInstant());
     }
 
-    private UserDto getUserDto() {
-        UserDto user = new UserDto(1L,
-                "test@example.com", "test", "1234", UserRole.BUYER, UserStatus.ACTIVE);
-        return user;
+    @Test
+    @DisplayName("Access Token의 User 정보 파싱이 성공한다.")
+    void access_token_userInfo() {
+        UserDto userDto = getUserDto();
+        AuthToken token = jwtManager.createAuthToken(userDto);
+        AccessTokenPayload extractUser = jwtManager.getAccessTokenPayload(token.getAccessToken());
+
+        assertEquals(userDto.getUserId(), extractUser.getUserId());
     }
 
     private Claims extractClaims(String token) {
