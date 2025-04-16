@@ -10,7 +10,7 @@ spring:
     hibernate:
       ddl-auto: none
 jwt:
-  refresh-token-expired-day: "30d"
-  access-token-expired-minutes: "30m"
-  algorithm: "HS256"
+  refresh-token-expired-day: 30
+  access-token-expired-minutes: 30
+  algorithm: HS256
 

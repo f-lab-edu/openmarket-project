@@ -1,6 +1,6 @@
 package oort.cloud.openmarket;
 
-import oort.cloud.openmarket.auth.jwt.JwtProperties;
+import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

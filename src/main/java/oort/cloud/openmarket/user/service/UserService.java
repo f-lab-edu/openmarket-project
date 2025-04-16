@@ -1,7 +1,8 @@
 package oort.cloud.openmarket.user.service;
 
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.exception.auth.DuplicateEmailException;
+import oort.cloud.openmarket.exception.business.DuplicateEmailException;
+import oort.cloud.openmarket.exception.business.UserNotFoundException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
@@ -36,12 +37,23 @@ public class UserService {
         );
 
         return UserDto.of(
+                savedUser.getUserId(),
                 savedUser.getEmail(),
                 savedUser.getUserName(),
                 savedUser.getPhone(),
                 savedUser.getUserRole(),
                 savedUser.getUserStatus()
         );
+    }
+
+    public Users findUserByEmail(String email){
+        return userRepository.findByEmail(email);
+    }
+
+    public UserDto findUserById(Long userId){
+        return userRepository.findById(userId)
+                .map(UserDto::from)
+                .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
     }
 
     public boolean duplicateEmail(String email){

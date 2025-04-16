@@ -1,8 +1,6 @@
 package oort.cloud.openmarket.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import oort.cloud.openmarket.filter.TokenFilter;
-import oort.cloud.openmarket.auth.jwt.JwtComponent;
+import oort.cloud.openmarket.filter.JwtAuthFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,12 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class FilterConfig {
 
     @Bean
-    public FilterRegistrationBean<TokenFilter> authFilterFilterRegistrationBean(JwtComponent jwtComponent, ObjectMapper objectMapper){
-        FilterRegistrationBean<TokenFilter> frb = new FilterRegistrationBean<>();
-        frb.setFilter(new TokenFilter(jwtComponent, objectMapper));
+    public FilterRegistrationBean<JwtAuthFilter> authFilterFilterRegistrationBean(JwtAuthFilter jwtAuthFilter){
+        FilterRegistrationBean<JwtAuthFilter> frb = new FilterRegistrationBean<>();
+        frb.setFilter(jwtAuthFilter);
         frb.addUrlPatterns("/v1/user/*");
         frb.addUrlPatterns("/v1/auth/logout");
-        frb.addUrlPatterns("/v1/auth/refresh-token");
         return frb;
     }
 }
