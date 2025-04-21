@@ -3,7 +3,7 @@ package oort.cloud.openmarket.exception.auth;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 
 public class InvalidTokenException extends AuthenticationException {
-    public InvalidTokenException(ErrorType errorType) {
-        super(errorType);
+    public InvalidTokenException() {
+        super(ErrorType.INVALID_TOKEN);
     }
 }

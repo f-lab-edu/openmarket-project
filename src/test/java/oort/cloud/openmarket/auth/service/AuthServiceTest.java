@@ -75,7 +75,7 @@ class AuthServiceTest {
         SignUpRequest request = new SignUpRequestTest(
                 "test@email.com", "1234", "test", "12312341234", UserRole.BUYER);
 
-        when(userService.save(request)).thenThrow(new DuplicateEmailException(ErrorType.DUPLICATE_EMAIL));
+        when(userService.save(request)).thenThrow(new DuplicateEmailException());
 
         // when & then
         assertThatThrownBy(() -> authService.signUp(request))
@@ -96,7 +96,7 @@ class AuthServiceTest {
         //when
         when(userService.findUserByEmail(request.getEmail())).thenReturn(user);
         when(encoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
-        when(jwtManager.createAuthToken(any(UserDto.class))).thenReturn(mockToken);
+        when(tokenService.createAuthToken(any(UserDto.class))).thenReturn(mockToken);
 
         UserDto userDto = authService.login(request);
 

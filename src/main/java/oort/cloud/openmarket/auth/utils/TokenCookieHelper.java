@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
 import oort.cloud.openmarket.exception.auth.AuthenticationException;
 import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +13,7 @@ import java.util.Arrays;
 
 @Component
 public class TokenCookieHelper {
-    private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+    private static final String REFRESH_TOKEN_COOKIE_NAME = "OMID";
     private final JwtProperties jwtProperties;
 
     public TokenCookieHelper(JwtProperties jwtProperties) {
@@ -38,7 +37,7 @@ public class TokenCookieHelper {
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN_COOKIE_NAME))
                 .findAny()
-                .orElseThrow(() -> new InvalidTokenException(ErrorType.INVALID_TOKEN))
+                .orElseThrow(() -> new InvalidTokenException())
                 .getValue();
     }
 

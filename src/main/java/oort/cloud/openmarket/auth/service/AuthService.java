@@ -17,13 +17,11 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
 
     public AuthService(
             UserService userService, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
     }
 
     public UserDto signUp(SignUpRequest request){
@@ -45,9 +43,9 @@ public class AuthService {
 
     private void validateUser(LoginRequest loginRequest, Users user) {
         if(user == null)
-            throw new UserNotFoundException(ErrorType.USER_NOT_FOUND);
+            throw new UserNotFoundException();
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
-            throw new InvalidPasswordException(ErrorType.INVALID_PASSWORD);
+            throw new InvalidPasswordException();
     }
 
 

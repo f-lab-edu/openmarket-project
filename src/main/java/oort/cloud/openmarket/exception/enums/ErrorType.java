@@ -11,7 +11,8 @@ public enum ErrorType{
     INVALID_TOKEN("유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
     EXPIRED_TOKEN("만료된 토큰 입니다.", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED_ACCESS("인가되지 않은 접근입니다.", HttpStatus.UNAUTHORIZED),
-    NOT_FOUND_REFRESH_TOKEN("저장된 토큰 정보가 없습니다.", HttpStatus.BAD_REQUEST)
+    NOT_FOUND_REFRESH_TOKEN("저장된 토큰 정보가 없습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_USER_STATE("유저 정보가 유효하지 않습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
     private final String message;
     private final HttpStatus status;

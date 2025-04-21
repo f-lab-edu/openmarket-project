@@ -24,7 +24,7 @@ public class UserService {
     @Transactional
     public UserDto save(SignUpRequest request){
         if(duplicateEmail(request.getEmail()))
-            throw new DuplicateEmailException(ErrorType.DUPLICATE_EMAIL);
+            throw new DuplicateEmailException();
 
         Users savedUser = userRepository.save(
                 Users.createUser(
@@ -53,7 +53,7 @@ public class UserService {
     public UserDto findUserById(Long userId){
         return userRepository.findById(userId)
                 .map(UserDto::from)
-                .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(UserNotFoundException::new);
     }
 
     public boolean duplicateEmail(String email){

@@ -4,7 +4,7 @@ import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 
 public class UserNotFoundException extends BusinessException {
-    public UserNotFoundException(ErrorType errorType) {
-        super(errorType);
+    public UserNotFoundException() {
+        super(ErrorType.USER_NOT_FOUND);
     }
 }

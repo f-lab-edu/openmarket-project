@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import oort.cloud.openmarket.auth.controller.request.LoginRequest;
 import oort.cloud.openmarket.data.LoginRequestTest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.auth.request.LoginRequestTest;
-import oort.cloud.openmarket.auth.request.SignUpRequestTest;
+import oort.cloud.openmarket.data.SignUpRequestTest;
 import oort.cloud.openmarket.user.enums.UserRole;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,14 +25,17 @@ class AuthApiTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Test
     @DisplayName("회원가입이 성공한다.")
     void success_sign_up() throws Exception {
-        String request = getValidRequest();
+        SignUpRequest request = getSignUpRequest();
 
         mockMvc.perform(post("/v1/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
     }
 

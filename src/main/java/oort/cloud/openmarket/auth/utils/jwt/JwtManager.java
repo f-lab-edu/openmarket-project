@@ -2,12 +2,11 @@ package oort.cloud.openmarket.auth.utils.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
-import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
 import oort.cloud.openmarket.auth.data.RefreshTokenPayload;
 import oort.cloud.openmarket.exception.auth.ExpiredTokenException;
 import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.exception.business.InvalidUserStateException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.enums.UserRole;
 import org.springframework.stereotype.Component;
@@ -21,18 +20,17 @@ import java.util.Date;
 @Component
 public class JwtManager {
     private final String CLAIM_USER_ROLE_VALUE = "userRole";
-    private final JwtProperties properties;
     private final Key secretKey;
     private final Clock clock;
 
 
     public JwtManager(JwtProperties properties, Clock clock) {
-        this.properties = properties;
         this.secretKey = properties.getSecretKey();
         this.clock = clock;
     }
 
     public String getRefreshToken(UserDto user, Duration duration) {
+        validateUser(user, false);
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .signWith(this.secretKey)
@@ -41,7 +39,17 @@ public class JwtManager {
                 .compact();
     }
 
+    private void validateUser(UserDto user, boolean checkRole) {
+        if (user.getUserId() == null) {
+            throw new InvalidUserStateException();
+        }
+        if (checkRole && user.getUserRole() == null) {
+            throw new InvalidUserStateException();
+        }
+    }
+
     public String getAccessToken(UserDto user, Duration duration) {
+        validateUser(user, true);
         return Jwts.builder()
                 .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
                 .signWith(this.secretKey)
@@ -50,16 +58,6 @@ public class JwtManager {
                 .setExpiration(getExpireDate(duration))
                 .compact();
     }
-
-    public AuthToken createAuthToken(UserDto user) {
-        Duration refreshDuration = Duration.ofDays(properties.refreshTokenExpiredDay());
-        Duration accessDuration = Duration.ofMinutes(properties.accessTokenExpiredMinutes());
-        return AuthToken.of(
-                getAccessToken(user, accessDuration),
-                getRefreshToken(user, refreshDuration)
-        );
-    }
-
 
     /*
          access_token에서 사용자 정보 추출
@@ -73,9 +71,9 @@ public class JwtManager {
             UserRole userRole = UserRole.valueOf(roleString);
             return AccessTokenPayload.of(userId, userRole);
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
-            throw new InvalidTokenException(ErrorType.INVALID_TOKEN);
+            throw new InvalidTokenException();
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException(ErrorType.EXPIRED_TOKEN);
+            throw new ExpiredTokenException();
         }
     }
 
@@ -85,9 +83,9 @@ public class JwtManager {
             Long userId = Long.parseLong(claims.getSubject());
             return RefreshTokenPayload.of(userId);
         } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
-            throw new InvalidTokenException(ErrorType.INVALID_TOKEN);
+            throw new InvalidTokenException();
         } catch (ExpiredJwtException e) {
-            throw new ExpiredTokenException(ErrorType.EXPIRED_TOKEN);
+            throw new ExpiredTokenException();
         }
     }
 

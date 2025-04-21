@@ -3,10 +3,8 @@ package oort.cloud.openmarket.auth.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import oort.cloud.openmarket.auth.annotations.AccessToken;
 import oort.cloud.openmarket.auth.controller.request.LoginRequest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.auth.data.AccessTokenPayload;
 import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.service.AuthService;
 import oort.cloud.openmarket.auth.service.TokenService;
@@ -36,11 +34,9 @@ public class AuthController {
     }
 
     @PostMapping("/v1/auth/login")
-    public ResponseEntity<AuthToken> login(@RequestBody @Valid LoginRequest loginRequest
-    , HttpServletResponse response){
+    public ResponseEntity<AuthToken> login(@RequestBody @Valid LoginRequest loginRequest){
         UserDto user = authService.login(loginRequest);
         AuthToken authToken = tokenService.createAuthToken(user);
-        tokenCookieHelper.addRefreshTokenCookie(response, authToken.getRefreshToken());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(authToken);

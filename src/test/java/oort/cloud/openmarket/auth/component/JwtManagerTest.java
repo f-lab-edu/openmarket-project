@@ -22,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.security.Key;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -54,8 +55,7 @@ class JwtManagerTest {
         UserDto userDto = getUserDto();
 
         //when
-        AuthToken authToken = jwtManager.createAuthToken(userDto);
-        String accessToken = authToken.getAccessToken();
+        String accessToken = jwtManager.getAccessToken(userDto, Duration.ofMinutes(30));
         AccessTokenPayload parseUserPayload = jwtManager.getAccessTokenPayload(accessToken);
 
         //then
@@ -69,8 +69,7 @@ class JwtManagerTest {
         UserDto user = getUserDto();
 
         //when
-        AuthToken authToken = jwtManager.createAuthToken(user);
-        String accessToken = authToken.getAccessToken();
+        String accessToken = jwtManager.getAccessToken(user, Duration.ofMinutes(30));
         String diffToken = accessToken.substring(0, 3) + "X" + accessToken.substring(4);
 
         //then
@@ -89,7 +88,7 @@ class JwtManagerTest {
     @DisplayName("Access Token의 만료 시간이 정확히 30분 뒤인지 확인")
     void accessToken_expiration_is_valid() {
         UserDto userDto = getUserDto();
-        String accessToken = jwtManager.createAuthToken(userDto).getAccessToken();
+        String accessToken = jwtManager.getAccessToken(userDto, Duration.ofMinutes(30));
 
         Claims claims = extractClaims(accessToken);
         Date expiration = claims.getExpiration();
@@ -106,9 +105,9 @@ class JwtManagerTest {
     @DisplayName("Refresh Token의 만료시간이 정확히 7일 이후")
     void refreshToken_has_longer_expiration() {
         UserDto userDto = getUserDto();
-        AuthToken token = jwtManager.createAuthToken(userDto);
+        String refreshToken = jwtManager.getRefreshToken(userDto, Duration.ofDays(7));
 
-        Claims refreshClaims = extractClaims(token.getRefreshToken());
+        Claims refreshClaims = extractClaims(refreshToken);
         Date expiration = refreshClaims.getExpiration();
 
         Instant expectedExpiration = this.clock.instant()
@@ -122,8 +121,8 @@ class JwtManagerTest {
     @DisplayName("Access Token의 User 정보 파싱이 성공한다.")
     void access_token_userInfo() {
         UserDto userDto = getUserDto();
-        AuthToken token = jwtManager.createAuthToken(userDto);
-        AccessTokenPayload extractUser = jwtManager.getAccessTokenPayload(token.getAccessToken());
+        String accessToken = jwtManager.getAccessToken(userDto, Duration.ofMinutes(30));
+        AccessTokenPayload extractUser = jwtManager.getAccessTokenPayload(accessToken);
 
         assertEquals(userDto.getUserId(), extractUser.getUserId());
     }

@@ -4,7 +4,7 @@ import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 
 public class DuplicateEmailException extends BusinessException {
-    public DuplicateEmailException(ErrorType errorType) {
-        super(errorType);
+    public DuplicateEmailException() {
+        super(ErrorType.DUPLICATE_EMAIL);
     }
 }

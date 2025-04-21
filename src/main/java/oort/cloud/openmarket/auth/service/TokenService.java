@@ -9,7 +9,6 @@ import oort.cloud.openmarket.auth.repository.RefreshTokenRepository;
 import oort.cloud.openmarket.exception.auth.ExpiredTokenException;
 import oort.cloud.openmarket.exception.auth.InvalidTokenException;
 import oort.cloud.openmarket.exception.auth.NotFoundRefreshTokenException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.service.UserService;
 import org.springframework.stereotype.Service;
@@ -35,13 +34,13 @@ public class TokenService {
     public String refreshAccessToken(String refreshToken) {
         Long userId = jwtManager.getRefreshTokenPayload(refreshToken).getUserId();
         RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundRefreshTokenException(ErrorType.NOT_FOUND_REFRESH_TOKEN));
+                .orElseThrow(NotFoundRefreshTokenException::new);
 
         if(!refreshToken.equals(savedToken.getToken()))
-            throw new InvalidTokenException(ErrorType.INVALID_TOKEN);
+            throw new InvalidTokenException();
 
         if(savedToken.getExpiredAt().isBefore(LocalDateTime.now()))
-            throw new ExpiredTokenException(ErrorType.EXPIRED_TOKEN);
+            throw new ExpiredTokenException();
 
         UserDto user = userService.findUserById(savedToken.getUserId());
         return jwtManager.getAccessToken(
