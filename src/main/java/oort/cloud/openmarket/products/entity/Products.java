@@ -3,6 +3,7 @@ package oort.cloud.openmarket.products.entity;
 import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
 import oort.cloud.openmarket.products.enums.ProductsEnum;
+import oort.cloud.openmarket.user.entity.Users;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,7 +16,9 @@ public class Products extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private Users user;
     private String productName;
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -29,10 +32,10 @@ public class Products extends BaseTimeEntity {
 
     protected Products(){}
 
-    public static Products create(String productName, Long userId, String description, int price, int stock){
+    public static Products create(String productName, Users user, String description, int price, int stock){
         Products products = new Products();
         products.productName = productName;
-        products.userId = userId;
+        products.user = user;
         products.description = description;
         products.price = price;
         products.stock = stock;
@@ -87,7 +90,7 @@ public class Products extends BaseTimeEntity {
         return productId;
     }
 
-    public Long getUserId(){ return userId; }
+    public Users getUser(){ return user; }
 
     public String getProductName() {
         return productName;

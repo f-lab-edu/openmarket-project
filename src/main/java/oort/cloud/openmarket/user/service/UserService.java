@@ -56,6 +56,11 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
     }
 
+    public Users findUserEntityById(Long userId){
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
+    }
+
     public boolean duplicateEmail(String email){
         return userRepository.existsByEmail(email);
     }
