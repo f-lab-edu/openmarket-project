@@ -3,7 +3,7 @@ package oort.cloud.openmarket.resolver;
 import jakarta.servlet.http.HttpServletRequest;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
 import oort.cloud.openmarket.auth.annotations.AccessToken;
-import oort.cloud.openmarket.common.CommonEnums;
+import oort.cloud.openmarket.common.enums.CommonEnums;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;

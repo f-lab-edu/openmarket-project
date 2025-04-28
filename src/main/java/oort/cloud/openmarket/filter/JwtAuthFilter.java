@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
-import oort.cloud.openmarket.common.CommonEnums;
+import oort.cloud.openmarket.common.enums.CommonEnums;
 import oort.cloud.openmarket.exception.auth.AuthenticationException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.exception.response.ApiExceptionResponse;

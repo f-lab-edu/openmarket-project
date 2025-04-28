@@ -2,8 +2,9 @@ package oort.cloud.openmarket.products.entity;
 
 import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
-import oort.cloud.openmarket.products.enums.ProductsEnum;
+import oort.cloud.openmarket.products.enums.ProductsStatus;
 import oort.cloud.openmarket.user.entity.Users;
+import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,16 +17,29 @@ public class Products extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long productId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Users user;
+
+    @Column(name = "product_name")
     private String productName;
+
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "price")
     private int price;
+
+    @Column(name = "stock")
     private int stock;
+
     @Enumerated(EnumType.STRING)
-    private ProductsEnum status;
+    @Column(name = "status")
+    private ProductsStatus status;
+
+    @Column(name = "sales_at")
+    private LocalDateTime salesAt;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCategory> productCategories = new ArrayList<>();
@@ -39,7 +53,7 @@ public class Products extends BaseTimeEntity {
         products.description = description;
         products.price = price;
         products.stock = stock;
-        products.status = ProductsEnum.READY;
+        products.status = ProductsStatus.READY;
         return products;
     }
 
@@ -81,10 +95,16 @@ public class Products extends BaseTimeEntity {
         this.stock = stock;
     }
 
-    public void setStatus(ProductsEnum status) {
+    public void setStatus(ProductsStatus status) {
+        if(ProductsStatus.SALE == status){
+            this.salesAt = LocalDateTime.now();
+        }
         this.status = status;
     }
 
+    public void setSalesAt(LocalDateTime salesAt) {
+        this.salesAt = salesAt;
+    }
 
     public Long getProductId() {
         return productId;
@@ -108,8 +128,12 @@ public class Products extends BaseTimeEntity {
         return stock;
     }
 
-    public ProductsEnum getStatus() {
+    public ProductsStatus getStatus() {
         return status;
+    }
+
+    public LocalDateTime getSalesAt(){
+        return salesAt;
     }
 
     @Override

@@ -7,7 +7,7 @@ import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.products.entity.Products;
-import oort.cloud.openmarket.products.enums.ProductsEnum;
+import oort.cloud.openmarket.products.enums.ProductsStatus;
 import oort.cloud.openmarket.products.repository.ProductsRepository;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.service.UserService;
@@ -20,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,7 +105,7 @@ class ProductsServiceTest {
 
         productsService.deleteProduct(123L);
 
-        assertThat(product.getStatus()).isEqualTo(ProductsEnum.DELETED);
+        assertThat(product.getStatus()).isEqualTo(ProductsStatus.DELETED);
     }
 
 

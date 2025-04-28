@@ -2,12 +2,14 @@ package oort.cloud.openmarket.products.entity;
 
 import jakarta.persistence.*;
 import oort.cloud.openmarket.category.entity.Category;
+import oort.cloud.openmarket.common.entity.BaseTimeEntity;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "product_categories")
-public class ProductCategory {
+public class ProductCategory{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +25,7 @@ public class ProductCategory {
 
     protected ProductCategory() {}
 
-    public static ProductCategory of(Products product, Category category) {
+    public static ProductCategory of(Products product, Category category, LocalDateTime createdAt) {
         ProductCategory productCategory = new ProductCategory();
         productCategory.product = product;
         productCategory.category = category;
@@ -37,6 +39,7 @@ public class ProductCategory {
     public void setCategory(Category category) {
         this.category = category;
     }
+
 
     @Override
     public String toString() {

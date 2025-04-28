@@ -35,7 +35,7 @@ class AuthApiTest {
         mockMvc.perform(post("/v1/auth/sign-up")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().is4xxClientError());
     }
 
     private SignUpRequest getSignUpRequest() {

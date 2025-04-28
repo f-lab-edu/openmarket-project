@@ -1,6 +1,6 @@
 package oort.cloud.openmarket.products.enums;
 
-public enum ProductsEnum {
+public enum ProductsStatus {
     READY, //판매 준비중
     SALE, //판매중
     OUT_OF_STOCK, //품절
