@@ -3,7 +3,11 @@ package oort.cloud.openmarket.products.controller;
 import jakarta.validation.Valid;
 import oort.cloud.openmarket.auth.annotations.AccessToken;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
+import oort.cloud.openmarket.common.cusor.CursorPageResponse;
+import oort.cloud.openmarket.common.cusor.CursorPageRequest;
+import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
+import oort.cloud.openmarket.products.controller.response.ProductsResponse;
 import oort.cloud.openmarket.products.service.ProductsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +39,18 @@ public class ProductController {
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
         productsService.deleteProduct(productId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/v1/products/categories/{categoryId}")
+    public CursorPageResponse<ProductsResponse> getCategoryProductList(
+            @ModelAttribute CursorPageRequest request,
+            @PathVariable Long categoryId
+            ){
+        return productsService.getProductsByCategoryCursorPaging(categoryId, request);
+    }
+
+    @GetMapping("/v1/products/{productId}")
+    public ProductDetailResponse getProductDetail(@PathVariable Long productId){
+        return productsService.getProductDetail(productId);
     }
 }

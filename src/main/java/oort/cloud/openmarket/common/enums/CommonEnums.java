@@ -1,4 +1,4 @@
-package oort.cloud.openmarket.common;
+package oort.cloud.openmarket.common.enums;
 
 public enum CommonEnums {
     ACCESS_TOKEN_PAYLOAD("accessTokenPayload")
