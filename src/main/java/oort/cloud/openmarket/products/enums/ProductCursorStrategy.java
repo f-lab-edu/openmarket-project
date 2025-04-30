@@ -109,7 +109,7 @@ public enum ProductCursorStrategy implements CursorStrategy {
         return Arrays.stream(values())
                 .filter(k -> k.key.equalsIgnoreCase(key))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundCursorSortStrategy(ErrorType.NOT_FOUNT_SORT_STRATEGY));
+                .orElseThrow(() -> new NotFoundCursorSortStrategy());
     }
 
 }

@@ -75,7 +75,7 @@ class AuthServiceTest {
         SignUpRequest request = new SignUpRequestTest(
                 "test@email.com", "1234", "test", "12312341234", UserRole.BUYER);
 
-        when(userService.save(request)).thenThrow(new DuplicateEmailException(ErrorType.DUPLICATE_EMAIL));
+        when(userService.save(request)).thenThrow(new DuplicateEmailException());
 
         // when & then
         assertThatThrownBy(() -> authService.signUp(request))
