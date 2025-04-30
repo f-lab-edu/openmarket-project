@@ -1,6 +1,6 @@
 package oort.cloud.openmarket.order.service;
 
-import oort.cloud.openmarket.exception.business.NotFoundProductException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
 import oort.cloud.openmarket.order.repository.OrderRepository;
@@ -48,7 +48,7 @@ public class OrderService {
         List<OrderItem> orderItems = orderItemRequests.stream().map(req -> {
             Long productId = req.getProductId();
             if (!products.containsKey(productId)) {
-                throw new NotFoundProductException();
+                throw new NotFoundResourceException("조회된 상품이 없습니다.");
             }
             return OrderItem.createOrderItem(products.get(productId), req.getQuantity());
         }).toList();

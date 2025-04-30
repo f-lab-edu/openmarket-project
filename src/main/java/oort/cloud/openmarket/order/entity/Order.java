@@ -2,7 +2,7 @@ package oort.cloud.openmarket.order.entity;
 
 import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
-import oort.cloud.openmarket.exception.business.UnsupportedStatusException;
+import oort.cloud.openmarket.common.exception.business.UnsupportedStatusException;
 import oort.cloud.openmarket.order.enums.OrderStatus;
 import oort.cloud.openmarket.user.entity.Address;
 import oort.cloud.openmarket.user.entity.Users;

@@ -1,8 +1,8 @@
 package oort.cloud.openmarket.order.service;
 
+import oort.cloud.openmarket.common.exception.business.OutOfStockException;
 import oort.cloud.openmarket.data.OrderCreateRequestTest;
 import oort.cloud.openmarket.data.OrderItemCreateRequestTest;
-import oort.cloud.openmarket.exception.business.OutOfStockException;
 import oort.cloud.openmarket.order.controller.request.OrderItemCreateRequest;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
@@ -21,9 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

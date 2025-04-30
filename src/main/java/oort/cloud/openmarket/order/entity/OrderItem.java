@@ -1,7 +1,7 @@
 package oort.cloud.openmarket.order.entity;
 
 import jakarta.persistence.*;
-import oort.cloud.openmarket.exception.business.UnsupportedStatusException;
+import oort.cloud.openmarket.common.exception.business.UnsupportedStatusException;
 import oort.cloud.openmarket.order.enums.OrderItemStatus;
 import oort.cloud.openmarket.products.entity.Products;
 
