@@ -65,7 +65,7 @@ class ProductsServiceTest {
         when(productsRepository.save(any(Products.class)))
                 .thenReturn(product);
 
-        Long productId = productsService.createProduct(userId, request);
+        Long productId = productsService.createProduct(userId, request).getProductId();
 
         assertThat(productId).isEqualTo(123L);
         verify(productsRepository).save(any(Products.class));

@@ -10,6 +10,7 @@ import oort.cloud.openmarket.common.cusor.CursorUtil;
 import oort.cloud.openmarket.exception.auth.UnauthorizedAccessException;
 import oort.cloud.openmarket.exception.business.NotFoundProductException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.products.controller.response.CreateProductResponse;
 import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.category.entity.Category;
@@ -43,7 +44,7 @@ public class ProductsService {
     }
 
     @Transactional
-    public Long createProduct(Long userId, ProductRequest request) {
+    public CreateProductResponse createProduct(Long userId, ProductRequest request) {
         Users user = userService.findUserEntityById(userId);
         Products product = Products.create(
                 request.getProductName(),
@@ -57,7 +58,7 @@ public class ProductsService {
         ProductCategory productCategory = ProductCategory.of(product, category, LocalDateTime.now());
         product.addProductCategories(productCategory);
 
-        return productsRepository.save(product).getProductId();
+        return new CreateProductResponse(productsRepository.save(product).getProductId());
     }
 
     @Transactional
