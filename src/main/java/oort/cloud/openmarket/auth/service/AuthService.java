@@ -17,13 +17,11 @@ import org.springframework.stereotype.Service;
 public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final TokenService tokenService;
 
     public AuthService(
-            UserService userService, PasswordEncoder passwordEncoder, TokenService tokenService) {
+            UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.tokenService = tokenService;
     }
 
     public UserDto signUp(SignUpRequest request){
