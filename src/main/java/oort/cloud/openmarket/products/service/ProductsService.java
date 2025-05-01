@@ -10,6 +10,8 @@ import oort.cloud.openmarket.products.entity.ProductCategory;
 import oort.cloud.openmarket.products.entity.Products;
 import oort.cloud.openmarket.products.enums.ProductsEnum;
 import oort.cloud.openmarket.products.repository.ProductsRepository;
+import oort.cloud.openmarket.user.entity.Users;
+import oort.cloud.openmarket.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,16 +19,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductsService {
     private final ProductsRepository productsRepository;
     private final CategoryService categoryService;
-    public ProductsService(ProductsRepository productsRepository, CategoryService categoryService) {
+    private final UserService userService;
+    public ProductsService(ProductsRepository productsRepository, CategoryService categoryService, UserService userService) {
         this.productsRepository = productsRepository;
         this.categoryService = categoryService;
+        this.userService = userService;
     }
 
     @Transactional
     public Long createProduct(Long userId, ProductRequest request) {
+        Users user = userService.findUserEntityById(userId);
         Products product = Products.create(
                 request.getProductName(),
-                userId,
+                user,
                 request.getDescription(),
                 request.getPrice(),
                 request.getStock()
@@ -44,7 +49,7 @@ public class ProductsService {
         Products product = productsRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundProductException(ErrorType.NOT_FOUND_PRODUCT));
 
-        if(userId.equals(product.getUserId()))
+        if(userId.equals(product.getUser().getUserId()))
             throw new UnauthorizedAccessException(ErrorType.UNAUTHORIZED_ACCESS);
 
         product.setProductName(request.getProductName());
