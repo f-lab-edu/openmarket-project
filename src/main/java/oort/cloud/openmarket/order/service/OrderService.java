@@ -1,5 +1,6 @@
 package oort.cloud.openmarket.order.service;
 
+import oort.cloud.openmarket.exception.business.NotFoundOrderException;
 import oort.cloud.openmarket.exception.business.NotFoundProductException;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
@@ -65,4 +66,7 @@ public class OrderService {
         return orderRepository.save(order).getOrderId();
     }
 
+    public Order findById(Long orderId){
+        return orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
+    }
 }
