@@ -1,7 +1,6 @@
 package oort.cloud.openmarket.order.service;
 
 import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
-import oort.cloud.openmarket.order.controller.reponse.OrderCreateResponse;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
 import oort.cloud.openmarket.order.repository.OrderRepository;
@@ -33,7 +32,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderCreateResponse createOrder(Long userId, OrderCreateRequest request){
+    public Long createOrder(Long userId, OrderCreateRequest request){
         //userId 유저 조회
         Users user = userService.findUserEntityById(userId);
 
@@ -61,17 +60,12 @@ public class OrderService {
                 request.getReceiverName(),
                 request.getReceiverPhone(),
                 orderItems);
-        orderRepository.save(order);
-        return new OrderCreateResponse(order.getOrderId(), order.getExternalOrderId());
+
+
+        return orderRepository.save(order).getOrderId();
     }
 
-    public Order findByOrderId(Long orderId){
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundResourceException("조회된 주문이 없습니다."));
-    }
-
-    public Order findByExternalOrderId(String externalOrderId){
-        return orderRepository.findByExternalOrderId(externalOrderId)
-                .orElseThrow(() -> new NotFoundResourceException("조회된 주문이 없습니다."));
+    public Order findById(Long orderId){
+        return orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
     }
 }
