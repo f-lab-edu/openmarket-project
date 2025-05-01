@@ -1,11 +1,16 @@
 package oort.cloud.openmarket.auth.service;
 
+import oort.cloud.openmarket.auth.controller.request.LoginRequest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
+import oort.cloud.openmarket.auth.data.AuthToken;
+import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
+import oort.cloud.openmarket.data.LoginRequestTest;
 import oort.cloud.openmarket.data.SignUpRequestTest;
-import oort.cloud.openmarket.exception.BusinessException;
-import oort.cloud.openmarket.exception.auth.DuplicateEmailException;
+import oort.cloud.openmarket.exception.business.BusinessException;
+import oort.cloud.openmarket.exception.business.DuplicateEmailException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
+import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
 import oort.cloud.openmarket.user.repository.UserRepository;
@@ -25,13 +30,15 @@ class AuthServiceTest {
     private UserRepository userRepository;
     private BCryptPasswordEncoder encoder;
     private UserService userService;
+    private JwtManager jwtManager;
 
     @BeforeEach
     void init(){
-        userRepository = mock(UserRepository.class);
         encoder = mock(BCryptPasswordEncoder.class);
         userService = mock(UserService.class);
-        authService = new AuthService(userService);
+        jwtManager = mock(JwtManager.class);
+        userRepository = mock(UserRepository.class);
+        authService = new AuthService(userService, encoder);
     }
 
     @Test
@@ -40,7 +47,7 @@ class AuthServiceTest {
         // given
         SignUpRequest request = mock(SignUpRequest.class);
 
-        UserDto expectedDto = UserDto.of("test@email.com",
+        UserDto expectedDto = UserDto.of(1L, "test@email.com",
                 "tester", "01012345678", UserRole.BUYER, UserStatus.ACTIVE);
 
         when(userService.save(request)).thenReturn(expectedDto);
@@ -67,6 +74,30 @@ class AuthServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining(ErrorType.DUPLICATE_EMAIL.getMessage());
 
+        verify(userRepository, never()).save(any(Users.class));
+    }
+
+    @Test
+    @DisplayName("정상 로그인 시 UserDto 타입 객체를 반환한다.")
+    void loginSuccess() {
+        //given
+        LoginRequest request = getLoginRequest();
+        AuthToken mockToken = AuthToken.of("accessToken", "refreshToken");
+        Users user = Users.createUser("test@example.com", "1234", "test", "2134", UserRole.BUYER);
+
+        //when
+        when(userService.findUserByEmail(request.getEmail())).thenReturn(user);
+        when(encoder.matches(request.getPassword(), user.getPassword())).thenReturn(true);
+        when(jwtManager.createAuthToken(any(UserDto.class))).thenReturn(mockToken);
+
+        UserDto userDto = authService.login(request);
+
+        //then
+        assertEquals(userDto.getUserId(), user.getUserId());
+    }
+
+    private LoginRequest getLoginRequest() {
+        return new LoginRequestTest("test@email.com", "1234");
     }
 
 }
