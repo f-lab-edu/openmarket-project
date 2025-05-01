@@ -65,4 +65,7 @@ public class OrderService {
         return orderRepository.save(order).getOrderId();
     }
 
+    public Order findById(Long orderId){
+        return orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
+    }
 }
