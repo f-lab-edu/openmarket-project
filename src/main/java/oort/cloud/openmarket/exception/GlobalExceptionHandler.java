@@ -6,6 +6,7 @@ import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.exception.response.RequestValidationErrorResponse;
 import oort.cloud.openmarket.exception.response.ApiExceptionResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -18,17 +19,18 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BusinessException.class)
+    @ExceptionHandler({BusinessException.class, AuthenticationException.class})
     public ResponseEntity<ApiExceptionResponse> handleBusinessException(BusinessException e){
         return ResponseEntity.status(e.getErrorType().getStatus()).body(
                 ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
         );
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiExceptionResponse> handleAuthenticationException(AuthenticationException e){
-        return ResponseEntity.status(e.getErrorType().getStatus()).body(
-                ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiExceptionResponse> handleInternalServerException(RuntimeException e){
+        log.error("[Internal Ex] Class : {}, Message : {}, ", e.getClass(), e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                ApiExceptionResponse.of(ErrorType.INTERNAL_ERROR.getMessage(), ErrorType.INTERNAL_ERROR)
         );
     }
 

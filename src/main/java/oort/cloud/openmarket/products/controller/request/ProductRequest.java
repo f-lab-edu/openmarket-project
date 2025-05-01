@@ -1,14 +1,8 @@
 package oort.cloud.openmarket.products.controller.request;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import oort.cloud.openmarket.products.enums.ProductsEnum;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 public class ProductRequest {
     @NotEmpty(message = "상품명은 필수 값입니다.")

@@ -14,7 +14,6 @@ public class FilterConfig {
         frb.setFilter(jwtAuthFilter);
         frb.addUrlPatterns("/v1/user/*");
         frb.addUrlPatterns("/v1/auth/logout");
-        frb.addUrlPatterns("/v1/products/*");
         return frb;
     }
 }
