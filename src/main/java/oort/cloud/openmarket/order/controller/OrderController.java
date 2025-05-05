@@ -20,7 +20,7 @@ public class OrderController {
     }
 
     @PostMapping("/v1/order")
-    public ResponseEntity<Long> createOrder(
+    public ResponseEntity<String> createOrder(
             @RequestBody @Valid OrderCreateRequest request,
             @AccessToken AccessTokenPayload user){
         return ResponseEntity

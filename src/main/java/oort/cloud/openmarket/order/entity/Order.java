@@ -1,5 +1,6 @@
 package oort.cloud.openmarket.order.entity;
 
+import de.huxhorn.sulky.ulid.ULID;
 import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
 import oort.cloud.openmarket.exception.business.UnsupportedStatusException;
@@ -18,6 +19,16 @@ public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
+
+    @Column(name = "external_order_id")
+    private String externalOrderId;
+
+    @PrePersist
+    private void assignExternalOrderId() {
+        if (this.externalOrderId == null) {
+            this.externalOrderId = new ULID().nextULID();
+        }
+    }
 
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
@@ -45,7 +56,8 @@ public class Order extends BaseTimeEntity {
 
     protected Order(){}
 
-    public static Order createOrder(Users user,
+    public static Order createOrder(
+                                    Users user,
                                     Address address,
                                     String receiverName,
                                     String receiverPhone,
@@ -140,5 +152,9 @@ public class Order extends BaseTimeEntity {
 
     public List<OrderItem> getOrderItems() {
         return orderItems;
+    }
+
+    public String getExternalOrderId() {
+        return externalOrderId;
     }
 }

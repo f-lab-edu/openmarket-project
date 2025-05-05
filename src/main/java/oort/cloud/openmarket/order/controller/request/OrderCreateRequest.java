@@ -3,16 +3,12 @@ package oort.cloud.openmarket.order.controller.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
 
 import java.util.List;
 
 public class OrderCreateRequest {
     @NotEmpty
     private List<OrderItemCreateRequest> orderItemRequests;
-
-    @NotEmpty
-    private PaymentCreateRequest paymentCreateRequest;
 
     @NotNull
     private Long addressId;
@@ -25,10 +21,6 @@ public class OrderCreateRequest {
 
     public List<OrderItemCreateRequest> getOrderItemRequests() {
         return orderItemRequests;
-    }
-
-    public PaymentCreateRequest getPaymentCreateRequest() {
-        return paymentCreateRequest;
     }
 
     public Long getAddressId() {

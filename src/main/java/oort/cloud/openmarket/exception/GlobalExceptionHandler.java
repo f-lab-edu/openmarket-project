@@ -1,11 +1,10 @@
 package oort.cloud.openmarket.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import oort.cloud.openmarket.exception.auth.AuthenticationException;
-import oort.cloud.openmarket.exception.business.BusinessException;
 import oort.cloud.openmarket.exception.enums.ErrorType;
-import oort.cloud.openmarket.exception.response.RequestValidationErrorResponse;
 import oort.cloud.openmarket.exception.response.ApiExceptionResponse;
+import oort.cloud.openmarket.exception.response.ExternalApiExceptionResponse;
+import oort.cloud.openmarket.exception.response.RequestValidationErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,11 +18,19 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({BusinessException.class, AuthenticationException.class})
-    public ResponseEntity<ApiExceptionResponse> handleBusinessException(BusinessException e){
+    @ExceptionHandler({ApiBaseException.class})
+    public ResponseEntity<ApiExceptionResponse> handleApiException(ApiBaseException e){
         return ResponseEntity.status(e.getErrorType().getStatus()).body(
                 ApiExceptionResponse.of(e.getMessage(), e.getErrorType())
         );
+    }
+
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<ExternalApiExceptionResponse> handleExternalApiException(ExternalApiException e){
+        return ResponseEntity.status(e.getStatus())
+                .body(
+                        new ExternalApiExceptionResponse(e.getErrorCode(), e.getMessage())
+                );
     }
 
     @ExceptionHandler(RuntimeException.class)

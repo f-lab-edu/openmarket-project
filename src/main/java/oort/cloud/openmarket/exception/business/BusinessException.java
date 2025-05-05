@@ -8,4 +8,5 @@ public class BusinessException extends ApiBaseException {
     public BusinessException(ErrorType errorType) {
         super(errorType);
     }
+
 }

@@ -33,7 +33,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Long createOrder(Long userId, OrderCreateRequest request){
+    public String createOrder(Long userId, OrderCreateRequest request){
         //userId 유저 조회
         Users user = userService.findUserEntityById(userId);
 
@@ -62,11 +62,14 @@ public class OrderService {
                 request.getReceiverPhone(),
                 orderItems);
 
-
-        return orderRepository.save(order).getOrderId();
+        return orderRepository.save(order).getExternalOrderId();
     }
 
     public Order findById(Long orderId){
         return orderRepository.findById(orderId).orElseThrow(NotFoundOrderException::new);
+    }
+
+    public Order findByExternalOrderId(String externalOrderId){
+        return orderRepository.findByExternalOrderId(externalOrderId).orElseThrow(NotFoundOrderException::new);
     }
 }

@@ -1,6 +1,5 @@
 package oort.cloud.openmarket.exception.response;
 
-
 import oort.cloud.openmarket.exception.enums.ErrorType;
 
 public class ApiExceptionResponse extends BaseExceptionResponse{

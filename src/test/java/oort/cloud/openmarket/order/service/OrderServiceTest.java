@@ -21,9 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +57,7 @@ class OrderServiceTest {
         mockUser = mock(Users.class);
         mockAddress = mock(Address.class);
 
+
         product1 = Products.create("test", mockUser, "test", product1Price, product1Stock); // 실제 생성자 대신 setter 또는 reflection으로 필드 채워도 무관
         ReflectionTestUtils.setField(product1, "productId", 100L);
         product2 = Products.create("test", mockUser, "test", product2Price, product2Stock); // 실제 생성자 대신 setter 또는 reflection으로 필드 채워도 무관
@@ -68,7 +71,7 @@ class OrderServiceTest {
         List<OrderItemCreateRequest> orderItems = List.of(new OrderItemCreateRequestTest(100L, 10),
                 new OrderItemCreateRequestTest(200L, 1));
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
-                orderItems, 10L, "test", "12312341234");
+                orderItems,10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
@@ -155,7 +158,7 @@ class OrderServiceTest {
                 new OrderItemCreateRequestTest(100L, product1OrderQuantity),
                 new OrderItemCreateRequestTest(200L, product2OrderQuantity));
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
-                orderItems, 10L, "test", "12312341234");
+                orderItems,10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
