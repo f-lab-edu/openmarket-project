@@ -2,40 +2,64 @@ package oort.cloud.openmarket.payment.service;
 
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.service.OrderService;
+import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
 import oort.cloud.openmarket.payment.entity.Payment;
-import oort.cloud.openmarket.payment.enums.PaymentStatus;
-import oort.cloud.openmarket.payment.service.request.SimplePaymentApiRequest;
+import oort.cloud.openmarket.payment.repository.PaymentRepository;
+import oort.cloud.openmarket.payment.service.data.PaymentDto;
+import oort.cloud.openmarket.payment.service.processor.PaymentProcessor;
+import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PaymentService {
     private final PaymentProcessor paymentProcessor;
     private final OrderService orderService;
+    private final PaymentRepository paymentRepository;
 
-    public PaymentService(PaymentProcessor paymentProcessor, OrderService orderService) {
+    public PaymentService(PaymentProcessor paymentProcessor, OrderService orderService, PaymentRepository paymentRepository) {
         this.paymentProcessor = paymentProcessor;
         this.orderService = orderService;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
-    public void processPayment(SimplePaymentApiRequest request){
-        //주문 조회
-        Order order = orderService.findById(request.getOrderId());
+    public Long processPayment(PaymentCreateRequest request){
+        System.out.println(request.getExternalOrderId());
+        //중복된 결제 요청 방지
+        Optional<Payment> paymentId = paymentRepository.findByExternalOrderId(request.getExternalOrderId());
+        if(paymentId.isPresent()){
+            return paymentId.get().getPaymentId();
+        }
 
-        //외부 PG API 결제 요청 (가상으로 처리함)
+        Order order = orderService.findByExternalOrderId(request.getExternalOrderId());
+        PaymentApiRequest apiRequest = new PaymentApiRequest.Builder()
+                                                            .paymentKey(UUID.randomUUID().toString())
+                                                            .orderId(request.getExternalOrderId())
+                                                            .amount(request.getAmount())
+                                                            .build();
 
-        //결제 처리 여부에 따른 처리
+        //외부 PG API 결제 요청 (테스트 컨트롤러로 처리함)
+        PaymentDto paymentDto = paymentProcessor.process(apiRequest);
 
         //결제 데이터 저장
-        Payment.createPayment(order, request.getPaymentMethod(), request.getAmount(), PaymentStatus.PAID);
+        Payment payment = Payment.createPayment(
+                order,
+                paymentDto.getExternalOrderId(),
+                paymentDto.getPaymentKey(),
+                paymentDto.getMethod(),
+                paymentDto.getTotalAmount(),
+                paymentDto.getStatus(),
+                paymentDto.getApprovedAt(),
+                paymentDto.getRequestedAt()
+        );
+        return paymentRepository.save(payment).getPaymentId();
     }
 
     public void cancelPayment(Long paymentId){
-        PriorityQueue<Integer> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a));
 
     }
 
