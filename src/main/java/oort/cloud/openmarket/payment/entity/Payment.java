@@ -11,15 +11,20 @@ import java.util.Objects;
 @Entity
 @Table(name = "payment")
 public class Payment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long paymentId;
+
+    @Column(name = "external_order_id")
+    private String externalOrderId;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @Column(name = "payment_key")
+    private String paymentKey;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
@@ -28,20 +33,36 @@ public class Payment {
     @Column(name = "amount")
     private int amount;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private PaymentStatus status;
 
-    @Column(name = "paid_at")
-    private LocalDateTime paidAt;
+    @Column(name = "approved_at")
+    private LocalDateTime approvedAt;
+
+    @Column(name = "requested_at")
+    private LocalDateTime requestedAt;
 
     protected Payment(){}
 
-    public static Payment createPayment(Order order, PaymentMethod paymentMethod, int mount, PaymentStatus status){
+    public static Payment createPayment(
+            Order order,
+            String externalOrderId,
+            String paymentKey,
+            String paymentMethod,
+            int amount,
+            String status,
+            LocalDateTime approvedAt,
+            LocalDateTime requestedAt){
         Payment payment = new Payment();
         payment.order = order;
-        payment.paymentMethod = paymentMethod;
-        payment.status = status;
-        payment.paidAt = LocalDateTime.now();
+        payment.externalOrderId = externalOrderId;
+        payment.paymentKey = paymentKey;
+        payment.paymentMethod = PaymentMethod.fromLabel(paymentMethod);
+        payment.amount = amount;
+        payment.status = PaymentStatus.valueOf(status);
+        payment.approvedAt = approvedAt;
+        payment.requestedAt = requestedAt;
         return payment;
     }
 
@@ -49,11 +70,14 @@ public class Payment {
     public String toString() {
         return "Payment{" +
                 "paymentId=" + paymentId +
+                ", externalOrderId='" + externalOrderId + '\'' +
                 ", order=" + order +
+                ", paymentKey='" + paymentKey + '\'' +
                 ", paymentMethod=" + paymentMethod +
                 ", amount=" + amount +
                 ", status=" + status +
-                ", paidAt=" + paidAt +
+                ", approvedAt=" + approvedAt +
+                ", requestedAt=" + requestedAt +
                 '}';
     }
 
@@ -70,16 +94,16 @@ public class Payment {
         return Objects.hash(paymentId);
     }
 
-    public void setStatus(PaymentStatus status) {
-        this.status = status;
-    }
-
     public Long getPaymentId() {
         return paymentId;
     }
 
     public Order getOrder() {
         return order;
+    }
+
+    public String getPaymentKey() {
+        return paymentKey;
     }
 
     public PaymentMethod getPaymentMethod() {
@@ -94,7 +118,15 @@ public class Payment {
         return status;
     }
 
-    public LocalDateTime getPaidAt() {
-        return paidAt;
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
+    public LocalDateTime getRequestedAt() {
+        return requestedAt;
+    }
+
+    public String getExternalOrderId() {
+        return externalOrderId;
     }
 }

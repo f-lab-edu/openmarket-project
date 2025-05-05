@@ -3,7 +3,6 @@ package oort.cloud.openmarket.order.controller;
 import jakarta.validation.Valid;
 import oort.cloud.openmarket.auth.annotations.AccessToken;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
-import oort.cloud.openmarket.order.controller.reponse.OrderCreateResponse;
 import oort.cloud.openmarket.order.controller.request.OrderCreateRequest;
 import oort.cloud.openmarket.order.service.OrderService;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,7 @@ public class OrderController {
     }
 
     @PostMapping("/v1/order")
-    public ResponseEntity<OrderCreateResponse> createOrder(
+    public ResponseEntity<String> createOrder(
             @RequestBody @Valid OrderCreateRequest request,
             @AccessToken AccessTokenPayload user){
         return ResponseEntity
