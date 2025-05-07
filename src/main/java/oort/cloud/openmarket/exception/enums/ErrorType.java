@@ -15,7 +15,10 @@ public enum ErrorType{
     NOT_FOUND_REFRESH_TOKEN("저장된 토큰 정보가 없습니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND_PRODUCT("저장된 상품 정보가 없습니다", HttpStatus.BAD_REQUEST),
     NOT_FOUND_CATEGORY("저장된 카테고리 정보가 없습니다", HttpStatus.BAD_REQUEST),
-    NOT_FOUNT_SORT_STRATEGY("제공하는 정렬 조건이 아닙니다.", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_SORT_STRATEGY("제공하는 정렬 조건이 아닙니다.", HttpStatus.BAD_REQUEST),
+    NOT_FOUND_ADDRESS("등록된 주소 정보가 없습니다.", HttpStatus.BAD_REQUEST),
+    UNSUPPORTED_STATE("지원되지 않는 상태 입니다.", HttpStatus.BAD_REQUEST),
+    OUT_OF_STOCK("주문 상품의 재고가 부족합니다.", HttpStatus.BAD_REQUEST)
 
     ;
     private final String message;

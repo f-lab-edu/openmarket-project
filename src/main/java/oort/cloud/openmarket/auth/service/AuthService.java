@@ -2,11 +2,8 @@ package oort.cloud.openmarket.auth.service;
 
 import oort.cloud.openmarket.auth.controller.request.LoginRequest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.auth.data.AuthToken;
-import oort.cloud.openmarket.auth.data.AccessTokenPayload;
 import oort.cloud.openmarket.exception.business.InvalidPasswordException;
-import oort.cloud.openmarket.exception.business.UserNotFoundException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.exception.business.NotFoundUserException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.service.UserService;
@@ -45,9 +42,9 @@ public class AuthService {
 
     private void validateUser(LoginRequest loginRequest, Users user) {
         if(user == null)
-            throw new UserNotFoundException(ErrorType.USER_NOT_FOUND);
+            throw new NotFoundUserException();
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
-            throw new InvalidPasswordException(ErrorType.INVALID_PASSWORD);
+            throw new InvalidPasswordException();
     }
 
 

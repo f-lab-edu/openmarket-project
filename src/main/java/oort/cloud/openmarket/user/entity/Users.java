@@ -2,32 +2,47 @@ package oort.cloud.openmarket.user.entity;
 
 
 import jakarta.persistence.*;
+import oort.cloud.openmarket.common.entity.BaseTimeEntity;
+import oort.cloud.openmarket.exception.business.NotFoundAddressException;
+import oort.cloud.openmarket.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
 @Table(name = "users")
-public class Users {
+public class Users extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "password")
     private String password;
+
+    @Column(name = "user_name")
     private String userName;
+
+    @Column(name = "phone")
     private String phone;
+
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole userRole;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Address> address = new ArrayList<>();
 
     protected Users() {}
 
@@ -39,11 +54,19 @@ public class Users {
         users.phone = phone;
         users.userRole = userRole;
         users.userStatus = UserStatus.ACTIVE;
-        users.createdAt = LocalDateTime.now();
-        users.updatedAt = users.createdAt;
         return users;
     }
+    public void addAddress(Address address){
+        this.address.add(address);
+        address.setUser(this);
+    }
 
+    public Address findAddress(Long addressId){
+        return this.address.stream()
+                .filter(addressObj -> addressObj.getAddressId().equals(addressId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundAddressException());
+    }
     public void setEmail(String email) {
         this.email = email;
     }
@@ -64,9 +87,6 @@ public class Users {
         this.userStatus = userStatus;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public String getPassword(){return password;};
 
@@ -94,14 +114,6 @@ public class Users {
         return userStatus;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -124,8 +136,8 @@ public class Users {
                 ", phone='" + phone + '\'' +
                 ", userRole=" + userRole +
                 ", userStatus=" + userStatus +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
+                ", createdAt=" + getCreatedAt() +
+                ", updatedAt=" + getUpdatedAt() +
                 '}';
     }
 }

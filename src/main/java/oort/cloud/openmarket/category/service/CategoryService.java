@@ -19,7 +19,7 @@ public class CategoryService {
 
     public Category findCategoryById(Long categoryId){
         return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundCategoryException(ErrorType.NOT_FOUND_CATEGORY));
+                .orElseThrow(() -> new NotFoundCategoryException());
     }
 
     @Transactional
@@ -27,7 +27,7 @@ public class CategoryService {
         Category parent = null;
         if(request.getParentId() != null){
             parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new NotFoundCategoryException(ErrorType.NOT_FOUND_CATEGORY));
+                    .orElseThrow(() -> new NotFoundCategoryException());
         }
         Category category = Category.of(request.getCategoryName(), parent);
         return categoryRepository.save(category).getCategoryId();
@@ -36,13 +36,13 @@ public class CategoryService {
     @Transactional
     public void updateCategory(Long categoryId, CategoryRequest request) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new NotFoundCategoryException(ErrorType.NOT_FOUND_CATEGORY));
+                .orElseThrow(() -> new NotFoundCategoryException());
 
         category.setCategoryName(request.getCategoryName());
 
         if(request.getParentId() != null){
             Category parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new NotFoundCategoryException(ErrorType.NOT_FOUND_CATEGORY));
+                    .orElseThrow(() -> new NotFoundCategoryException());
             category.setParent(parent);
         }else{
             category.setParent(null);
