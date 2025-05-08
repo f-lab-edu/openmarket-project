@@ -132,9 +132,10 @@ class CategoryServiceTest {
 
     @Test
     @DisplayName("카테고리 삭제에 성공한다.")
-    void deleteCategory_성공() {
+    void success_delete() {
         categoryService.deleteCategory(3L);
 
         verify(categoryRepository).deleteByCategoryId(3L);
     }
+
 }

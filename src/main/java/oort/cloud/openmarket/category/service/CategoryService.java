@@ -70,6 +70,7 @@ public class CategoryService {
                 .orElseThrow(NotFoundCategoryException::new);
         return createCategoryTree(parent);
     }
+
     private CategoryTreeResponse createCategoryTree(Category category) {
         return new CategoryTreeResponse(
                 category.getCategoryId(),

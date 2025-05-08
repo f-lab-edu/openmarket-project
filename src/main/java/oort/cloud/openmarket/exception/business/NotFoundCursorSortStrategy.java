@@ -4,6 +4,6 @@ import oort.cloud.openmarket.exception.enums.ErrorType;
 
 public class NotFoundCursorSortStrategy extends BusinessException{
     public NotFoundCursorSortStrategy() {
-        super(ErrorType.NOT_FOUND_SORT_STRATEGY);
+        super(ErrorType.NOT_FOUNT_SORT_STRATEGY);
     }
 }

@@ -2,8 +2,7 @@ package oort.cloud.openmarket.user.service;
 
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
 import oort.cloud.openmarket.exception.business.DuplicateEmailException;
-import oort.cloud.openmarket.exception.business.UserNotFoundException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.exception.business.NotFoundUserException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.repository.UserRepository;
@@ -24,7 +23,7 @@ public class UserService {
     @Transactional
     public UserDto save(SignUpRequest request){
         if(duplicateEmail(request.getEmail()))
-            throw new DuplicateEmailException(ErrorType.DUPLICATE_EMAIL);
+            throw new DuplicateEmailException();
 
         Users savedUser = userRepository.save(
                 Users.createUser(
@@ -53,12 +52,12 @@ public class UserService {
     public UserDto findUserById(Long userId){
         return userRepository.findById(userId)
                 .map(UserDto::from)
-                .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(NotFoundUserException::new);
     }
 
     public Users findUserEntityById(Long userId){
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(ErrorType.USER_NOT_FOUND));
+                .orElseThrow(NotFoundUserException::new);
     }
 
     public boolean duplicateEmail(String email){
