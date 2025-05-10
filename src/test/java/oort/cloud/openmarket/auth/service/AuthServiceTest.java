@@ -6,9 +6,9 @@ import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
 import oort.cloud.openmarket.data.LoginRequestTest;
 import oort.cloud.openmarket.data.SignUpRequestTest;
-import oort.cloud.openmarket.exception.business.BusinessException;
-import oort.cloud.openmarket.exception.business.DuplicateEmailException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.exception.business.BusinessException;
+import oort.cloud.openmarket.common.exception.business.DuplicateEmailException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.enums.UserRole;
@@ -67,7 +67,7 @@ class AuthServiceTest {
         SignUpRequest request = new SignUpRequestTest(
                 "test@email.com", "1234", "test", "12312341234", UserRole.BUYER);
 
-        when(userService.save(request)).thenThrow(new DuplicateEmailException(ErrorType.DUPLICATE_EMAIL));
+        when(userService.save(request)).thenThrow(new DuplicateEmailException());
 
         // when & then
         assertThatThrownBy(() -> authService.signUp(request))

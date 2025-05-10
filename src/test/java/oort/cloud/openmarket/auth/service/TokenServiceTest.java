@@ -6,9 +6,9 @@ import oort.cloud.openmarket.auth.entity.RefreshToken;
 import oort.cloud.openmarket.auth.repository.RefreshTokenRepository;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
-import oort.cloud.openmarket.exception.auth.ExpiredTokenException;
-import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.auth.NotFoundRefreshTokenException;
+import oort.cloud.openmarket.common.exception.auth.ExpiredTokenException;
+import oort.cloud.openmarket.common.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
@@ -16,7 +16,6 @@ import oort.cloud.openmarket.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -120,7 +119,7 @@ class TokenServiceTest {
         when(refreshTokenRepository.findByUserId(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> tokenService.refreshAccessToken("some-token"))
-                .isInstanceOf(NotFoundRefreshTokenException.class);
+                .isInstanceOf(UnauthorizedAccessException.class);
     }
 
     @Test
