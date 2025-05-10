@@ -4,12 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
+import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
-import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.enums.UserRole;
 import oort.cloud.openmarket.user.enums.UserStatus;
@@ -28,7 +28,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest

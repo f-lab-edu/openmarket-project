@@ -3,13 +3,13 @@ package oort.cloud.openmarket.auth.service;
 import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.data.RefreshTokenPayload;
 import oort.cloud.openmarket.auth.entity.RefreshToken;
+import oort.cloud.openmarket.auth.repository.RefreshTokenRepository;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
-import oort.cloud.openmarket.auth.repository.RefreshTokenRepository;
-import oort.cloud.openmarket.exception.auth.ExpiredTokenException;
-import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.auth.NotFoundRefreshTokenException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.exception.auth.ExpiredTokenException;
+import oort.cloud.openmarket.common.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.service.UserService;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class TokenService {
     public String refreshAccessToken(String refreshToken) {
         Long userId = jwtManager.getRefreshTokenPayload(refreshToken).getUserId();
         RefreshToken savedToken = refreshTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFoundRefreshTokenException(ErrorType.NOT_FOUND_REFRESH_TOKEN));
+                .orElseThrow(UnauthorizedAccessException::new);
 
         if(!refreshToken.equals(savedToken.getToken()))
             throw new InvalidTokenException(ErrorType.INVALID_TOKEN);

@@ -3,10 +3,9 @@ package oort.cloud.openmarket.auth.utils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
-import oort.cloud.openmarket.exception.auth.AuthenticationException;
-import oort.cloud.openmarket.exception.auth.InvalidTokenException;
-import oort.cloud.openmarket.exception.business.BusinessException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.exception.auth.AuthenticationException;
+import oort.cloud.openmarket.common.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
