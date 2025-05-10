@@ -29,7 +29,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         resolver.setOneIndexedParameters(true);
         resolver.setFallbackPageable(PageRequest.of(0, 10));
         resolver.setMaxPageSize(100);
-
         resolvers.add(resolver);
     }
 }

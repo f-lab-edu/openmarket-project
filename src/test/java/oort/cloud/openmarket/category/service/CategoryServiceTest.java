@@ -4,9 +4,8 @@ import oort.cloud.openmarket.category.controller.reponse.CreateCategoryResponse;
 import oort.cloud.openmarket.category.controller.request.CategoryRequest;
 import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.category.repository.CategoryRepository;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.data.CategoryRequestTest;
-import oort.cloud.openmarket.exception.business.NotFoundCategoryException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,8 +98,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.createCategory(request))
-                .isInstanceOf(NotFoundCategoryException.class)
-                .hasMessageContaining(ErrorType.NOT_FOUND_CATEGORY.getMessage());
+                .isInstanceOf(NotFoundResourceException.class);
     }
 
     @Test
@@ -127,7 +125,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.updateCategory(999L, request))
-                .isInstanceOf(NotFoundCategoryException.class);
+                .isInstanceOf(NotFoundResourceException.class);
     }
 
     @Test
