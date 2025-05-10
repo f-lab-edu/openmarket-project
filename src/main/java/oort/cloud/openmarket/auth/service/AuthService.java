@@ -2,8 +2,8 @@ package oort.cloud.openmarket.auth.service;
 
 import oort.cloud.openmarket.auth.controller.request.LoginRequest;
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.exception.business.InvalidPasswordException;
-import oort.cloud.openmarket.exception.business.NotFoundUserException;
+import oort.cloud.openmarket.common.exception.business.InvalidPasswordException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.service.UserService;
@@ -40,7 +40,7 @@ public class AuthService {
 
     private void validateUser(LoginRequest loginRequest, Users user) {
         if(user == null)
-            throw new NotFoundUserException();
+            throw new NotFoundResourceException("조회된 유저 정보가 없습니다.");
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
             throw new InvalidPasswordException();
     }

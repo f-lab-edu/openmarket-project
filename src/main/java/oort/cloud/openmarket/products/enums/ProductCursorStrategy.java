@@ -2,11 +2,10 @@ package oort.cloud.openmarket.products.enums;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import oort.cloud.openmarket.common.cusor.Cursor;
-import oort.cloud.openmarket.common.cusor.CursorField;
-import oort.cloud.openmarket.common.cusor.CursorStrategy;
-import oort.cloud.openmarket.exception.business.NotFoundCursorSortStrategy;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.paging.cusor.Cursor;
+import oort.cloud.openmarket.common.paging.cusor.CursorField;
+import oort.cloud.openmarket.common.paging.cusor.CursorStrategy;
+import oort.cloud.openmarket.common.exception.business.InvalidSortValueException;
 import oort.cloud.openmarket.products.entity.QProducts;
 
 import java.time.LocalDateTime;
@@ -109,7 +108,7 @@ public enum ProductCursorStrategy implements CursorStrategy {
         return Arrays.stream(values())
                 .filter(k -> k.key.equalsIgnoreCase(key))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundCursorSortStrategy());
+                .orElseThrow(InvalidSortValueException::new);
     }
 
 }

@@ -1,8 +1,8 @@
 package oort.cloud.openmarket.user.service;
 
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.exception.business.DuplicateEmailException;
-import oort.cloud.openmarket.exception.business.NotFoundUserException;
+import oort.cloud.openmarket.common.exception.business.DuplicateEmailException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.repository.UserRepository;
@@ -52,12 +52,12 @@ public class UserService {
     public UserDto findUserById(Long userId){
         return userRepository.findById(userId)
                 .map(UserDto::from)
-                .orElseThrow(NotFoundUserException::new);
+                .orElseThrow(() -> new NotFoundResourceException("조회된 유저 정보가 없습니다."));
     }
 
     public Users findUserEntityById(Long userId){
         return userRepository.findById(userId)
-                .orElseThrow(NotFoundUserException::new);
+                .orElseThrow(() -> new NotFoundResourceException("조회된 유저 정보가 없습니다."));
     }
 
     public boolean duplicateEmail(String email){

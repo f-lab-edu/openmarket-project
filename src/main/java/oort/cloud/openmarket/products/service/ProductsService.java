@@ -2,24 +2,24 @@ package oort.cloud.openmarket.products.service;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.category.service.CategoryService;
-import oort.cloud.openmarket.common.cusor.Cursor;
-import oort.cloud.openmarket.common.cusor.CursorPageResponse;
-import oort.cloud.openmarket.common.cusor.CursorPageRequest;
-import oort.cloud.openmarket.common.cusor.CursorUtil;
-import oort.cloud.openmarket.exception.auth.UnauthorizedAccessException;
-import oort.cloud.openmarket.exception.business.NotFoundProductException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.paging.cusor.Cursor;
+import oort.cloud.openmarket.common.paging.cusor.CursorPageRequest;
+import oort.cloud.openmarket.common.paging.cusor.CursorPageResponse;
+import oort.cloud.openmarket.common.paging.cusor.CursorUtil;
+import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
+import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.products.controller.response.CreateProductResponse;
 import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
-import oort.cloud.openmarket.products.controller.request.ProductRequest;
-import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.products.controller.response.ProductsResponse;
 import oort.cloud.openmarket.products.entity.ProductCategory;
 import oort.cloud.openmarket.products.entity.Products;
 import oort.cloud.openmarket.products.enums.ProductCursorStrategy;
 import oort.cloud.openmarket.products.enums.ProductsCursorField;
 import oort.cloud.openmarket.products.enums.ProductsStatus;
+import oort.cloud.openmarket.products.repository.ProductQueryDslRepository;
 import oort.cloud.openmarket.products.repository.ProductsRepository;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.service.UserService;
@@ -36,11 +36,14 @@ public class ProductsService {
     private final CategoryService categoryService;
     private final UserService userService;
     private final CursorUtil cursorUtil;
-    public ProductsService(ProductsRepository productsRepository, CategoryService categoryService, UserService userService, CursorUtil cursorUtil) {
+    private final ProductQueryDslRepository productQueryDslRepository;
+
+    public ProductsService(ProductsRepository productsRepository, CategoryService categoryService, UserService userService, CursorUtil cursorUtil, ProductQueryDslRepository productQueryDslRepository) {
         this.productsRepository = productsRepository;
         this.categoryService = categoryService;
         this.userService = userService;
         this.cursorUtil = cursorUtil;
+        this.productQueryDslRepository = productQueryDslRepository;
     }
 
     @Transactional
@@ -64,10 +67,10 @@ public class ProductsService {
     @Transactional
     public void updateProduct(Long userId, Long productId, ProductRequest request){
         Products product = productsRepository.findById(productId)
-                .orElseThrow(NotFoundProductException::new);
+                .orElseThrow(() -> new NotFoundResourceException("조회된 상품이 없습니다."));
 
         if(userId.equals(product.getUser().getUserId()))
-            throw new UnauthorizedAccessException(ErrorType.UNAUTHORIZED_ACCESS);
+            throw new UnauthorizedAccessException();
 
         product.setProductName(request.getProductName());
         product.setDescription(request.getDescription());
@@ -83,7 +86,7 @@ public class ProductsService {
     @Transactional
     public void deleteProduct(Long productId){
         Products product = productsRepository.findById(productId)
-                .orElseThrow(NotFoundProductException::new);
+                .orElseThrow(() -> new NotFoundResourceException("조회된 상품이 없습니다."));
         product.setStatus(ProductsStatus.DELETED);
     }
 
@@ -100,7 +103,7 @@ public class ProductsService {
         
         Optional<BooleanExpression> cursorCondition = sortKey.getBooleanExpression(cursor);
 
-        List<ProductsResponse> contents = productsRepository.findByCategoryWithSortAndCursor(
+        List<ProductsResponse> contents = productQueryDslRepository.findByCategoryWithSortAndCursor(
                 categoryId,
                 cursorCondition.orElse(null),
                 orderSpecifiers,
@@ -130,6 +133,6 @@ public class ProductsService {
     public ProductDetailResponse getProductDetail(Long productId) {
         return productsRepository.findById(productId)
                 .map(ProductDetailResponse::new)
-                .orElseThrow(NotFoundProductException::new);
+                .orElseThrow(() -> new NotFoundResourceException("조회된 상품이 없습니다."));
     }
 }
