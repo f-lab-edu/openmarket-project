@@ -1,29 +1,31 @@
 package oort.cloud.openmarket.category.service;
 
-import oort.cloud.openmarket.category.controller.reponse.CategoryTreeResponse;
+import oort.cloud.openmarket.category.controller.reponse.CategoryResponse;
 import oort.cloud.openmarket.category.controller.reponse.CreateCategoryResponse;
 import oort.cloud.openmarket.category.controller.request.CategoryRequest;
 import oort.cloud.openmarket.category.entity.Category;
+import oort.cloud.openmarket.category.repository.CategoryQueryDslRepository;
 import oort.cloud.openmarket.category.repository.CategoryRepository;
-import oort.cloud.openmarket.exception.business.NotFoundCategoryException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
+import oort.cloud.openmarket.common.paging.offset.OffsetPageResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryQueryDslRepository categoryQueryDslRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryQueryDslRepository categoryQueryDslRepository) {
         this.categoryRepository = categoryRepository;
+        this.categoryQueryDslRepository = categoryQueryDslRepository;
     }
 
     public Category findCategoryById(Long categoryId){
         return categoryRepository.findById(categoryId)
-                .orElseThrow(NotFoundCategoryException::new);
+                .orElseThrow(NotFoundResourceException::new);
     }
 
     @Transactional
@@ -31,7 +33,7 @@ public class CategoryService {
         Category parent = null;
         if(request.getParentId() != null){
             parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(NotFoundCategoryException::new);
+                    .orElseThrow(NotFoundResourceException::new);
         }
         Category category = Category.of(request.getCategoryName(), parent);
         Category saved = categoryRepository.save(category);
@@ -41,13 +43,13 @@ public class CategoryService {
     @Transactional
     public void updateCategory(Long categoryId, CategoryRequest request) {
         Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(NotFoundCategoryException::new);
+                .orElseThrow(NotFoundResourceException::new);
 
         category.setCategoryName(request.getCategoryName());
 
         if(request.getParentId() != null){
             Category parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(NotFoundCategoryException::new);
+                    .orElseThrow(NotFoundResourceException::new);
             category.setParent(parent);
         }else{
             category.setParent(null);
@@ -58,26 +60,12 @@ public class CategoryService {
         categoryRepository.deleteByCategoryId(categoryId);
     }
 
-    public List<CategoryTreeResponse> getCategoryList() {
-        List<Category> parent = categoryRepository.findByParentIsNull();
-        return parent.stream()
-                .map(this::createCategoryTree)
-                .collect(Collectors.toList());
+    public OffsetPageResponse<CategoryResponse> getRootCategoryList(Pageable pageable) {
+        return categoryQueryDslRepository.findByParentIsNull(null, pageable);
     }
 
-    public CategoryTreeResponse getCategorySubList(Long categoryId) {
-        Category parent = categoryRepository.findById(categoryId)
-                .orElseThrow(NotFoundCategoryException::new);
-        return createCategoryTree(parent);
+    public OffsetPageResponse<CategoryResponse> getSubCategoryList(Long categoryId, Pageable pageable) {
+        return categoryQueryDslRepository.findByParentIsNull(categoryId, pageable);
     }
 
-    private CategoryTreeResponse createCategoryTree(Category category) {
-        return new CategoryTreeResponse(
-                category.getCategoryId(),
-                category.getCategoryName(),
-                category.getChildren().stream()
-                        .map(this::createCategoryTree)
-                        .collect(Collectors.toList())
-        );
-    }
 }

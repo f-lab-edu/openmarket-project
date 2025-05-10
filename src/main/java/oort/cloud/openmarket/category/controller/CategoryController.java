@@ -1,14 +1,15 @@
 package oort.cloud.openmarket.category.controller;
 
 import jakarta.validation.Valid;
-import oort.cloud.openmarket.category.controller.reponse.CategoryTreeResponse;
+import oort.cloud.openmarket.category.controller.reponse.CategoryResponse;
 import oort.cloud.openmarket.category.controller.reponse.CreateCategoryResponse;
 import oort.cloud.openmarket.category.controller.request.CategoryRequest;
 import oort.cloud.openmarket.category.service.CategoryService;
+import oort.cloud.openmarket.common.paging.offset.OffsetPageResponse;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 public class CategoryController {
@@ -36,16 +37,18 @@ public class CategoryController {
     }
 
     @GetMapping("/v1/admin/categories")
-    public ResponseEntity<List<CategoryTreeResponse>> getCategoryList(){
+    public ResponseEntity<OffsetPageResponse<CategoryResponse>> getCategoryRootList(
+            Pageable pageable
+    ){
         return ResponseEntity.ok()
-                .body(categoryService.getCategoryList());
+                .body(categoryService.getRootCategoryList(pageable));
     }
 
     @GetMapping("/v1/admin/categories/{categoryId}")
-    public ResponseEntity<CategoryTreeResponse> getCategorySubList(
-            @PathVariable Long categoryId){
+    public ResponseEntity<OffsetPageResponse<CategoryResponse>> getCategorySubList(
+            Pageable pageable, @PathVariable Long categoryId){
         return ResponseEntity.ok()
-                .body(categoryService.getCategorySubList(categoryId));
+                .body(categoryService.getSubCategoryList(categoryId, pageable));
     }
 
 
