@@ -28,7 +28,6 @@ public class PaymentService {
 
     @Transactional
     public Long processPayment(PaymentCreateRequest request){
-        System.out.println(request.getExternalOrderId());
         //중복된 결제 요청 방지
         Optional<Payment> paymentId = paymentRepository.findByExternalOrderId(request.getExternalOrderId());
         if(paymentId.isPresent()){
