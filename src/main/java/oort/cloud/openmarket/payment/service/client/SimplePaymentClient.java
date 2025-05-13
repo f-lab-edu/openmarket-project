@@ -3,9 +3,11 @@ package oort.cloud.openmarket.payment.service.client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
-import oort.cloud.openmarket.exception.external.PaymentApiException;
-import oort.cloud.openmarket.exception.response.ExternalApiExceptionResponse;
+import lombok.extern.slf4j.Slf4j;
+import oort.cloud.openmarket.common.exception.business.ExternalApiException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
+import oort.cloud.openmarket.payment.service.response.ExternalApiErrorResponse;
 import oort.cloud.openmarket.payment.service.response.SimplePaymentResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -20,10 +22,11 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 
 @Component
+@Slf4j
 public class SimplePaymentClient {
     private RestClient restClient;
 
-    @Value("http://127.0.0.1:8080/test/payment")
+    @Value("${external.payment.url}")
     private String simplePaymentUrl;
 
     private final ObjectMapper objectMapper;
@@ -34,6 +37,7 @@ public class SimplePaymentClient {
 
     @PostConstruct
     void init(){
+        simplePaymentUrl += "/test/payment";
         restClient = RestClient.create(simplePaymentUrl);
     }
 
@@ -60,17 +64,21 @@ public class SimplePaymentClient {
         }
     }
 
+    /**
+     *       외부 결제 API 서버 에러 발생시 단순히 예외만 던짐
+     *       추 후 별도의 처리가 필요할 경우 수정이 필요
+     */
     @Recover
     public SimplePaymentResponse approvePaymentRecover(HttpServerErrorException e, PaymentApiRequest request) {
         throw createPaymentApiException(e);
     }
 
-
-    private PaymentApiException createPaymentApiException(HttpStatusCodeException e) {
+    private ExternalApiException createPaymentApiException(HttpStatusCodeException e) {
         try {
-            ExternalApiExceptionResponse response =
-                    objectMapper.readValue(e.getResponseBodyAsString(), ExternalApiExceptionResponse.class);
-            return new PaymentApiException(response.getErrorCode(), response.getMessage(), e.getStatusCode().value());
+            ExternalApiErrorResponse response =
+                    objectMapper.readValue(e.getResponseBodyAsString(), ExternalApiErrorResponse.class);
+            log.error("[Payment] API Error Code: {}, Error Message {}", response.getErrorCode(), response.getMessage());
+            return new ExternalApiException(ErrorType.INTERNAL_ERROR, response.getMessage());
         } catch (JsonProcessingException ex) {
             throw new RuntimeException("[Payment] ErrorResponse Parsing Error", ex);
         }
