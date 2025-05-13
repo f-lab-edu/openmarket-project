@@ -5,9 +5,6 @@ public class PaymentApiRequest {
     private String paymentKey;
     private int amount;
 
-    public PaymentApiRequest() {
-    }
-
     private PaymentApiRequest(Builder builder){
         this.externalOrderId = builder.orderId;
         this.paymentKey = builder.paymentKey;

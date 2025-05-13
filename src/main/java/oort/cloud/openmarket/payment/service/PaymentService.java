@@ -1,8 +1,12 @@
 package oort.cloud.openmarket.payment.service;
 
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.order.entity.Order;
+import oort.cloud.openmarket.order.enums.OrderStatus;
 import oort.cloud.openmarket.order.service.OrderService;
 import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
+import oort.cloud.openmarket.payment.controller.response.PaymentCreateResponse;
+import oort.cloud.openmarket.payment.controller.response.PaymentDetailResponse;
 import oort.cloud.openmarket.payment.entity.Payment;
 import oort.cloud.openmarket.payment.repository.PaymentRepository;
 import oort.cloud.openmarket.payment.service.data.PaymentDto;
@@ -27,13 +31,13 @@ public class PaymentService {
     }
 
     @Transactional
-    public Long processPayment(PaymentCreateRequest request){
+    public PaymentCreateResponse processPayment(PaymentCreateRequest request){
         //중복된 결제 요청 방지
-        Optional<Payment> paymentId = paymentRepository.findByExternalOrderId(request.getExternalOrderId());
-        if(paymentId.isPresent()){
-            return paymentId.get().getPaymentId();
+        Optional<Payment> savedPayment = paymentRepository.findByExternalOrderId(request.getExternalOrderId());
+        if(savedPayment.isPresent()){
+            return new PaymentCreateResponse(savedPayment.get().getPaymentId());
         }
-
+        //결제 대상 주문 찾기
         Order order = orderService.findByExternalOrderId(request.getExternalOrderId());
         PaymentApiRequest apiRequest = new PaymentApiRequest.Builder()
                                                             .paymentKey(UUID.randomUUID().toString())
@@ -55,11 +59,16 @@ public class PaymentService {
                 paymentDto.getApprovedAt(),
                 paymentDto.getRequestedAt()
         );
-        return paymentRepository.save(payment).getPaymentId();
+
+        //주문 상태 결제완료로 변경
+        order.setStatus(OrderStatus.PAID);
+
+        return new PaymentCreateResponse(paymentRepository.save(payment).getPaymentId());
     }
 
-    public void cancelPayment(Long paymentId){
-
+    public PaymentDetailResponse getPaymentDetail(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new NotFoundResourceException("결제 정보를 찾을 수 없습니다."));
+        return new PaymentDetailResponse(payment);
     }
-
 }

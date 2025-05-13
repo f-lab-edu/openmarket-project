@@ -1,7 +1,8 @@
 package oort.cloud.openmarket.payment.service;
 
+import oort.cloud.openmarket.common.exception.business.ExternalApiException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.data.PaymentCreateRequestTest;
-import oort.cloud.openmarket.exception.external.PaymentApiException;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.service.OrderService;
 import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
@@ -13,7 +14,6 @@ import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -54,7 +54,7 @@ class PaymentServiceTest {
 
 
         // when
-        Long result = paymentService.processPayment(request);
+        Long result = paymentService.processPayment(request).getPaymentId();
 
         // then
         assertThat(result).isEqualTo(savedPaymentId);
@@ -93,7 +93,7 @@ class PaymentServiceTest {
         when(paymentRepository.save(any())).thenReturn(savedPayment);
 
         // when
-        Long result = paymentService.processPayment(request);
+        Long result = paymentService.processPayment(request).getPaymentId();
 
         // then
         assertThat(result).isEqualTo(newPaymentId);
@@ -116,10 +116,10 @@ class PaymentServiceTest {
         when(orderService.findByExternalOrderId(externalOrderId)).thenReturn(order);
 
         when(paymentProcessor.process(any(PaymentApiRequest.class))).thenThrow(
-                new PaymentApiException("TestErrorCode", "테스트 에러 입니다", HttpStatus.BAD_REQUEST.value()));
+                new ExternalApiException(ErrorType.INTERNAL_ERROR, "외부 API 결제 에러"));
 
         // when
-        assertThatThrownBy(() -> paymentService.processPayment(request)).isInstanceOf(PaymentApiException.class);
+        assertThatThrownBy(() -> paymentService.processPayment(request)).isInstanceOf(ExternalApiException.class);
 
         // then
         verify(paymentRepository, never()).save(any());

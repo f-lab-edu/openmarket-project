@@ -1,6 +1,6 @@
 package oort.cloud.openmarket.payment.service.processor;
 
-import oort.cloud.openmarket.exception.external.PaymentApiException;
+import oort.cloud.openmarket.common.exception.business.ExternalApiException;
 import oort.cloud.openmarket.payment.service.client.SimplePaymentClient;
 import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +46,7 @@ class SimplePaymentProcessorTest {
                 .when(simplePaymentClient).approvePayment(any());
 
         assertThatThrownBy(() -> processor.process(req))
-                .isInstanceOf(PaymentApiException.class);
+                .isInstanceOf(ExternalApiException.class);
 
         verify(simplePaymentClient, times(3)).approvePayment(any());
     }
