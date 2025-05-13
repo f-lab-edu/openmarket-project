@@ -1,6 +1,6 @@
 package oort.cloud.openmarket.products.enums;
 
-import oort.cloud.openmarket.common.cusor.CursorField;
+import oort.cloud.openmarket.common.paging.cusor.CursorField;
 import oort.cloud.openmarket.products.controller.response.ProductsResponse;
 
 import java.time.LocalDateTime;

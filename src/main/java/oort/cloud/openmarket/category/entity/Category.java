@@ -1,6 +1,8 @@
 package oort.cloud.openmarket.category.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.BatchSize;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,7 @@ public class Category {
     private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @BatchSize(size = 20) //N + 1 문제 해결 방법 1
     private List<Category> children = new ArrayList<>();
 
     protected Category() {}

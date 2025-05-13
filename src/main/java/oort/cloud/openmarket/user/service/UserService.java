@@ -1,15 +1,10 @@
 package oort.cloud.openmarket.user.service;
 
 import oort.cloud.openmarket.auth.controller.request.SignUpRequest;
-import oort.cloud.openmarket.exception.business.DuplicateEmailException;
-import oort.cloud.openmarket.exception.business.NotFoundAddressException;
-import oort.cloud.openmarket.exception.business.NotFoundUserException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
-import oort.cloud.openmarket.user.controller.request.AddressCreateRequest;
+import oort.cloud.openmarket.common.exception.business.DuplicateEmailException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.user.data.UserDto;
-import oort.cloud.openmarket.user.entity.Address;
 import oort.cloud.openmarket.user.entity.Users;
-import oort.cloud.openmarket.user.repository.AddressRepository;
 import oort.cloud.openmarket.user.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,12 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final AddressRepository addressRepository;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, AddressRepository addressRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.addressRepository = addressRepository;
     }
 
     @Transactional
@@ -52,21 +45,6 @@ public class UserService {
         );
     }
 
-    @Transactional
-    public Long createAddress(Long userId, AddressCreateRequest request){
-        Users user = userRepository.findById(userId).orElseThrow(() -> new NotFoundUserException());
-        Address address = Address.of(
-                user,
-                request.getAddress(),
-                request.getAddressDetail(),
-                request.getPostalCode());
-        return addressRepository.save(address).getAddressId();
-    }
-
-    public Address findAddressById(Long addressId){
-        return addressRepository.findById(addressId).orElseThrow(() -> new NotFoundAddressException());
-    }
-
     public Users findUserByEmail(String email){
         return userRepository.findByEmail(email);
     }
@@ -74,12 +52,12 @@ public class UserService {
     public UserDto findUserById(Long userId){
         return userRepository.findById(userId)
                 .map(UserDto::from)
-                .orElseThrow(() -> new NotFoundUserException());
+                .orElseThrow(() -> new NotFoundResourceException("조회된 유저 정보가 없습니다."));
     }
 
     public Users findUserEntityById(Long userId){
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundUserException());
+                .orElseThrow(() -> new NotFoundResourceException("조회된 유저 정보가 없습니다."));
     }
 
     public boolean duplicateEmail(String email){

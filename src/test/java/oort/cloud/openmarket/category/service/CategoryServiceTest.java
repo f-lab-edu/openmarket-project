@@ -1,12 +1,11 @@
 package oort.cloud.openmarket.category.service;
 
-import oort.cloud.openmarket.category.service.CategoryService;
-import oort.cloud.openmarket.data.CategoryRequestTest;
-import oort.cloud.openmarket.exception.business.NotFoundCategoryException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.category.controller.reponse.CreateCategoryResponse;
 import oort.cloud.openmarket.category.controller.request.CategoryRequest;
 import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.category.repository.CategoryRepository;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
+import oort.cloud.openmarket.data.CategoryRequestTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -67,9 +67,9 @@ class CategoryServiceTest {
         when(categoryRepository.findById(1L)).thenReturn(Optional.of(parentCategory));
         when(categoryRepository.save(any(Category.class))).thenReturn(saved);
 
-        Long result = categoryService.createCategory(request);
+        CreateCategoryResponse result = categoryService.createCategory(request);
 
-        assertThat(result).isEqualTo(10L);
+        assertThat(result.getCategoryId()).isEqualTo(10L);
         verify(categoryRepository).findById(1L);
         verify(categoryRepository).save(any(Category.class));
     }
@@ -84,9 +84,9 @@ class CategoryServiceTest {
 
         when(categoryRepository.save(any(Category.class))).thenReturn(saved);
 
-        Long result = categoryService.createCategory(request);
+        CreateCategoryResponse result = categoryService.createCategory(request);
 
-        assertThat(result).isEqualTo(11L);
+        assertThat(result.getCategoryId()).isEqualTo(11L);
         verify(categoryRepository, never()).findById(any());
         verify(categoryRepository).save(any(Category.class));
     }
@@ -98,8 +98,7 @@ class CategoryServiceTest {
         when(categoryRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.createCategory(request))
-                .isInstanceOf(NotFoundCategoryException.class)
-                .hasMessageContaining(ErrorType.NOT_FOUND_CATEGORY.getMessage());
+                .isInstanceOf(NotFoundResourceException.class);
     }
 
     @Test
@@ -126,14 +125,15 @@ class CategoryServiceTest {
         when(categoryRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> categoryService.updateCategory(999L, request))
-                .isInstanceOf(NotFoundCategoryException.class);
+                .isInstanceOf(NotFoundResourceException.class);
     }
 
     @Test
     @DisplayName("카테고리 삭제에 성공한다.")
-    void deleteCategory_성공() {
+    void success_delete() {
         categoryService.deleteCategory(3L);
 
         verify(categoryRepository).deleteByCategoryId(3L);
     }
+
 }

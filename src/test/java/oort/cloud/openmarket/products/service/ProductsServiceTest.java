@@ -1,11 +1,10 @@
 package oort.cloud.openmarket.products.service;
 
-import oort.cloud.openmarket.category.service.CategoryService;
-import oort.cloud.openmarket.data.ProductRequestTest;
-import oort.cloud.openmarket.exception.business.NotFoundProductException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
-import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.category.entity.Category;
+import oort.cloud.openmarket.category.service.CategoryService;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
+import oort.cloud.openmarket.data.ProductRequestTest;
+import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.products.entity.Products;
 import oort.cloud.openmarket.products.enums.ProductsStatus;
 import oort.cloud.openmarket.products.repository.ProductsRepository;
@@ -65,7 +64,7 @@ class ProductsServiceTest {
         when(productsRepository.save(any(Products.class)))
                 .thenReturn(product);
 
-        Long productId = productsService.createProduct(userId, request);
+        Long productId = productsService.createProduct(userId, request).getProductId();
 
         assertThat(productId).isEqualTo(123L);
         verify(productsRepository).save(any(Products.class));
@@ -95,8 +94,7 @@ class ProductsServiceTest {
         when(productsRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> productsService.updateProduct(1L, 999L, request))
-                .isInstanceOf(NotFoundProductException.class)
-                .hasMessageContaining(ErrorType.NOT_FOUND_PRODUCT.getMessage());
+                .isInstanceOf(NotFoundResourceException.class);
     }
 
     @Test

@@ -6,9 +6,9 @@ import oort.cloud.openmarket.auth.data.AuthToken;
 import oort.cloud.openmarket.auth.utils.jwt.JwtManager;
 import oort.cloud.openmarket.data.LoginRequestTest;
 import oort.cloud.openmarket.data.SignUpRequestTest;
-import oort.cloud.openmarket.exception.business.BusinessException;
-import oort.cloud.openmarket.exception.business.DuplicateEmailException;
-import oort.cloud.openmarket.exception.enums.ErrorType;
+import oort.cloud.openmarket.common.exception.business.BusinessException;
+import oort.cloud.openmarket.common.exception.business.DuplicateEmailException;
+import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.user.data.UserDto;
 import oort.cloud.openmarket.user.entity.Users;
 import oort.cloud.openmarket.user.enums.UserRole;
@@ -19,10 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,18 +31,14 @@ class AuthServiceTest {
     private BCryptPasswordEncoder encoder;
     private UserService userService;
     private JwtManager jwtManager;
-    private TokenService tokenService;
-    private Clock clock;
 
     @BeforeEach
     void init(){
         encoder = mock(BCryptPasswordEncoder.class);
         userService = mock(UserService.class);
-        tokenService = mock(TokenService.class);
         jwtManager = mock(JwtManager.class);
         userRepository = mock(UserRepository.class);
-        authService = new AuthService(userService, encoder, tokenService);
-        clock = Clock.fixed(Instant.now(), ZoneId.systemDefault());
+        authService = new AuthService(userService, encoder);
     }
 
     @Test

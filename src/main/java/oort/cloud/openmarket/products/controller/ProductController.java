@@ -3,8 +3,9 @@ package oort.cloud.openmarket.products.controller;
 import jakarta.validation.Valid;
 import oort.cloud.openmarket.auth.annotations.AccessToken;
 import oort.cloud.openmarket.auth.data.AccessTokenPayload;
-import oort.cloud.openmarket.common.cusor.CursorPageResponse;
-import oort.cloud.openmarket.common.cusor.CursorPageRequest;
+import oort.cloud.openmarket.common.paging.cusor.CursorPageResponse;
+import oort.cloud.openmarket.common.paging.cusor.CursorPageRequest;
+import oort.cloud.openmarket.products.controller.response.CreateProductResponse;
 import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.products.controller.response.ProductsResponse;
@@ -21,10 +22,10 @@ public class ProductController {
     }
 
     @PostMapping("/v1/products")
-    public ResponseEntity<Long> createProduct(@RequestBody @Valid ProductRequest request,
-                                              @AccessToken AccessTokenPayload payload){
-        Long productId = productsService.createProduct(payload.getUserId(), request);
-        return ResponseEntity.ok(productId);
+    public ResponseEntity<CreateProductResponse> createProduct(@RequestBody @Valid ProductRequest request,
+                                                               @AccessToken AccessTokenPayload payload){
+        return ResponseEntity.ok()
+                .body(productsService.createProduct(payload.getUserId(), request));
     }
 
     @PutMapping("/v1/products/{productId}")
@@ -42,15 +43,17 @@ public class ProductController {
     }
 
     @GetMapping("/v1/products/categories/{categoryId}")
-    public CursorPageResponse<ProductsResponse> getCategoryProductList(
+    public ResponseEntity<CursorPageResponse<ProductsResponse>> getCategoryProductList(
             @ModelAttribute CursorPageRequest request,
             @PathVariable Long categoryId
             ){
-        return productsService.getProductsByCategoryCursorPaging(categoryId, request);
+        return ResponseEntity.ok()
+                .body(productsService.getProductsByCategoryCursorPaging(categoryId, request));
     }
 
     @GetMapping("/v1/products/{productId}")
-    public ProductDetailResponse getProductDetail(@PathVariable Long productId){
-        return productsService.getProductDetail(productId);
+    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId){
+        return ResponseEntity.ok()
+                .body(productsService.getProductDetail(productId));
     }
 }
