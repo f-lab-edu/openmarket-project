@@ -1,11 +1,11 @@
 package oort.cloud.openmarket.payment.service.request;
 
-public class PaymentApiRequest {
-    private String externalOrderId;
-    private String paymentKey;
-    private int amount;
+public class PaymentApproveRequest {
+    private final String externalOrderId;
+    private final String paymentKey;
+    private final int amount;
 
-    private PaymentApiRequest(Builder builder){
+    private PaymentApproveRequest(Builder builder){
         this.externalOrderId = builder.orderId;
         this.paymentKey = builder.paymentKey;
         this.amount = builder.amount;
@@ -31,8 +31,8 @@ public class PaymentApiRequest {
             return this;
         }
 
-        public PaymentApiRequest build(){
-            return new PaymentApiRequest(this);
+        public PaymentApproveRequest build(){
+            return new PaymentApproveRequest(this);
         }
     }
     public String getExternalOrderId() {

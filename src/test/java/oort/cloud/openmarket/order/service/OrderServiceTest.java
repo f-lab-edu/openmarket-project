@@ -1,12 +1,17 @@
 package oort.cloud.openmarket.order.service;
 
+import oort.cloud.openmarket.common.exception.business.NotAllowedActionException;
 import oort.cloud.openmarket.common.exception.business.OutOfStockException;
 import oort.cloud.openmarket.data.OrderCreateRequestTest;
 import oort.cloud.openmarket.data.OrderItemCreateRequestTest;
+import oort.cloud.openmarket.order.controller.reponse.OrderCancelResponse;
+import oort.cloud.openmarket.order.controller.request.OrderCancelRequest;
 import oort.cloud.openmarket.order.controller.request.OrderItemCreateRequest;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
+import oort.cloud.openmarket.order.enums.OrderStatus;
 import oort.cloud.openmarket.order.repository.OrderRepository;
+import oort.cloud.openmarket.payment.service.PaymentService;
 import oort.cloud.openmarket.products.entity.Products;
 import oort.cloud.openmarket.products.service.ProductsService;
 import oort.cloud.openmarket.user.entity.Address;
@@ -23,8 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -38,6 +46,8 @@ class OrderServiceTest {
     private UserService userService;
     @Mock
     private ProductsService productsService;
+    @Mock
+    private PaymentService paymentService;
     @InjectMocks
     private OrderService orderService;
 
@@ -191,5 +201,53 @@ class OrderServiceTest {
         assertThat(savedOrderItems)
                 .extracting(orderItem -> orderItem.getProduct().getStock())
                 .containsExactlyInAnyOrder(expectProduct1Stock, expectProduct2Stock);
+    }
+
+    @Test
+    void success_order_cancel(){
+        //given
+        Long orderId = 1L;
+        String externalOrderId = UUID.randomUUID().toString();
+        Order mockOrder = mock(Order.class);
+        List<OrderItem> mockOrderItems = List.of(mock(OrderItem.class),mock(OrderItem.class));
+        OrderCancelRequest request = mock(OrderCancelRequest.class);
+
+        //when
+        when(request.getReason()).thenReturn("단순 변심");
+        when(mockOrder.getExternalOrderId()).thenReturn(externalOrderId);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+        when(mockOrder.getOrderItems()).thenReturn(mockOrderItems);
+
+        OrderCancelResponse cancelResponse = orderService.cancel(orderId, request);
+
+        //then
+        verify(orderRepository).findById(orderId);
+        verify(paymentService).cancel(externalOrderId, "단순 변심");
+        verify(mockOrder).setStatus(OrderStatus.CANCELLED);
+        mockOrderItems.forEach(orderItem -> verify(orderItem).cancel());
+
+        assertThat(orderId).isEqualTo(cancelResponse.getOrderId());
+    }
+
+    @Test
+    void fail_order_cancel(){
+        //given
+        Long orderId = 1L;
+        Order mockOrder = mock(Order.class);
+        OrderItem mockOrderItem = mock(OrderItem.class);
+        OrderCancelRequest request = mock(OrderCancelRequest.class);
+
+        //when
+        doThrow(new NotAllowedActionException("배송중인 상품이 있을 경우 주문 취소가 불가능 합니다."))
+                .when(mockOrderItem).cancel();
+        when(mockOrder.getOrderItems()).thenReturn(List.of(mockOrderItem));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+
+        assertThatThrownBy(() -> orderService.cancel(orderId, request))
+                .isInstanceOf(NotAllowedActionException.class);
+
+        verify(paymentService, never()).cancel(any(), anyString());
+        verify(mockOrder, never()).setStatus(OrderStatus.CANCELLED);
+
     }
 }

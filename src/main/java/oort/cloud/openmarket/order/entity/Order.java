@@ -23,13 +23,6 @@ public class Order extends BaseTimeEntity {
     @Column(name = "external_order_id")
     private String externalOrderId;
 
-    @PrePersist
-    private void assignExternalOrderId() {
-        if (this.externalOrderId == null) {
-            this.externalOrderId = new ULID().nextULID();
-        }
-    }
-
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
@@ -68,6 +61,7 @@ public class Order extends BaseTimeEntity {
         order.status = OrderStatus.CREATED;
         order.receiverName = receiverName;
         order.receiverPhone = receiverPhone;
+        order.externalOrderId = new ULID().nextULID();
         for (OrderItem orderItem : orderItems) {
             order.totalAmount += orderItem.getTotalPrice();
             order.addOrderItem(orderItem);

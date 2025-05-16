@@ -1,7 +1,7 @@
 package oort.cloud.openmarket.order.entity;
 
 import jakarta.persistence.*;
-import oort.cloud.openmarket.common.exception.business.UnsupportedStatusException;
+import oort.cloud.openmarket.common.exception.business.NotAllowedActionException;
 import oort.cloud.openmarket.order.enums.OrderItemStatus;
 import oort.cloud.openmarket.products.entity.Products;
 
@@ -60,7 +60,7 @@ public class OrderItem {
 
     public void cancel(){
         if(!status.isCancellable()){
-            throw new UnsupportedStatusException();
+            throw new NotAllowedActionException("배송중인 상품이 있을 경우 주문 취소가 불가능 합니다.");
         }
         product.addStock(quantity);
         this.setStatus(OrderItemStatus.CANCELLED);
