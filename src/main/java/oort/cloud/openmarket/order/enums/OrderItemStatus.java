@@ -13,7 +13,14 @@ public enum OrderItemStatus {
     private static final EnumSet<OrderItemStatus> CANCELLABLE_STATUSES =
             EnumSet.of(ORDERED);
 
+    private static final EnumSet<OrderItemStatus> SHIPPABLE_STATUSES =
+            EnumSet.of(ORDERED);
+
     public boolean isCancellable() {
         return CANCELLABLE_STATUSES.contains(this);
+    }
+
+    public boolean isShippable() {
+        return SHIPPABLE_STATUSES.contains(this);
     }
 }
