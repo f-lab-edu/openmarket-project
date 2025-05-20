@@ -19,7 +19,7 @@ public class Payment {
     private String externalOrderId;
 
     @OneToOne
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", unique = true, nullable = false)
     private Order order;
 
     @Column(name = "payment_key")

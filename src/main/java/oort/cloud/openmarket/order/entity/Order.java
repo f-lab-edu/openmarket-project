@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
 import oort.cloud.openmarket.common.exception.business.UnsupportedStatusException;
 import oort.cloud.openmarket.order.enums.OrderStatus;
+import oort.cloud.openmarket.payment.entity.Payment;
 import oort.cloud.openmarket.user.entity.Address;
 import oort.cloud.openmarket.user.entity.Users;
 
@@ -46,6 +47,9 @@ public class Order extends BaseTimeEntity {
 
     @Column(name = "receiver_phone")
     private String receiverPhone;
+
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
 
     protected Order(){}
 
@@ -150,5 +154,9 @@ public class Order extends BaseTimeEntity {
 
     public String getExternalOrderId() {
         return externalOrderId;
+    }
+
+    public Payment getPayment() {
+        return payment;
     }
 }
