@@ -4,12 +4,12 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import oort.cloud.openmarket.category.entity.Category;
 import oort.cloud.openmarket.category.service.CategoryService;
+import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
+import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.common.paging.cusor.Cursor;
 import oort.cloud.openmarket.common.paging.cusor.CursorPageRequest;
 import oort.cloud.openmarket.common.paging.cusor.CursorPageResponse;
 import oort.cloud.openmarket.common.paging.cusor.CursorUtil;
-import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
-import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.products.controller.response.CreateProductResponse;
 import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
@@ -134,5 +134,9 @@ public class ProductsService {
         return productsRepository.findById(productId)
                 .map(ProductDetailResponse::new)
                 .orElseThrow(() -> new NotFoundResourceException("조회된 상품이 없습니다."));
+    }
+
+    public List<Products> getProductListByIds(List<Long> ids){
+        return productsRepository.findAllById(ids);
     }
 }

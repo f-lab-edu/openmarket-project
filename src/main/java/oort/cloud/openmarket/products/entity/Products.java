@@ -2,6 +2,7 @@ package oort.cloud.openmarket.products.entity;
 
 import jakarta.persistence.*;
 import oort.cloud.openmarket.common.entity.BaseTimeEntity;
+import oort.cloud.openmarket.common.exception.business.OutOfStockException;
 import oort.cloud.openmarket.products.enums.ProductsStatus;
 import oort.cloud.openmarket.user.entity.Users;
 
@@ -60,6 +61,12 @@ public class Products extends BaseTimeEntity {
         this.stock += count;
     }
 
+    public void removeStock(int quantity) {
+        if (stock < quantity){
+            throw new OutOfStockException();
+        }
+        this.stock -= quantity;
+    }
 
     public void addProductCategories(ProductCategory productCategory){
         productCategories.add(productCategory);
