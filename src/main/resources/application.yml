@@ -21,4 +21,7 @@ jwt:
   refresh-token-expired-day: 30
   access-token-expired-minutes: 30
   algorithm: HS256
+external:
+  payment:
+    url: http://127.0.0.1:8080/test/payment
 
