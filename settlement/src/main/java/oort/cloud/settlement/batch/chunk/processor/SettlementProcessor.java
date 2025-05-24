@@ -1,0 +1,33 @@
+package oort.cloud.settlement.batch.chunk.processor;
+
+import lombok.extern.slf4j.Slf4j;
+import oort.cloud.settlement.batch.domain.OrderItemDto;
+import oort.cloud.settlement.batch.domain.SettlementDto;
+import oort.cloud.settlement.batch.domain.enums.SettlementStatus;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Slf4j
+@Component
+public class SettlementProcessor implements ItemProcessor<OrderItemDto, SettlementDto> {
+    @Override
+    public SettlementDto process(OrderItemDto item) throws Exception {
+        int commissionAmount = item.getCommissionRate()
+                .multiply(BigDecimal.valueOf(item.getTotalPrice()))
+                .intValue();
+        log.info("SettlementProcessor 시작...");
+        log.info("OrderItemDto : {}", item);
+        return SettlementDto.of(
+                item.getUserid(),
+                item.getTotalPrice() - commissionAmount,
+                commissionAmount,
+                SettlementStatus.PENDING,
+                item.getOrderItemId(),
+                LocalDate.now().plusDays(1),
+                null
+        );
+    }
+}

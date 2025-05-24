@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: none
   application:
     name: settlement
   datasource:
@@ -14,4 +16,7 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+logging:
+  level:
+    org.springframework.batch.item.database: DEBUG
 
