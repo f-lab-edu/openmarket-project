@@ -4,6 +4,7 @@ import oort.cloud.openmarket.common.exception.business.NotAllowedActionException
 import oort.cloud.openmarket.common.exception.business.NotFoundResourceException;
 import oort.cloud.openmarket.common.paging.offset.OffsetPageResponse;
 import oort.cloud.openmarket.order.entity.OrderItem;
+import oort.cloud.openmarket.order.enums.OrderItemStatus;
 import oort.cloud.openmarket.order.service.OrderItemService;
 import oort.cloud.openmarket.shipment.controller.request.ShipmentCreateRequest;
 import oort.cloud.openmarket.shipment.controller.request.ShipmentSearchRequest;
@@ -18,6 +19,8 @@ import oort.cloud.openmarket.user.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 public class ShipmentService {
@@ -65,8 +68,15 @@ public class ShipmentService {
 
     @Transactional
     public void modifyStatus(Long shipmentId, ShipmentStatus status) {
-        shipmentRepository.findById(shipmentId)
+        Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new NotFoundResourceException("조회된 배송 정보가 없습니다."));
-        shipmentRepository.updateShipmentStatus(shipmentId, status);
+        LocalDateTime deliveredAt = LocalDateTime.now();
+
+        shipment.setStatus(ShipmentStatus.DELIVERED);
+        shipment.setDeliveredAt(deliveredAt);
+
+        OrderItem orderItem = shipment.getOrderItem();
+        orderItem.setStatus(OrderItemStatus.DELIVERED);
+        orderItem.setDeliveredAt(deliveredAt);
     }
 }

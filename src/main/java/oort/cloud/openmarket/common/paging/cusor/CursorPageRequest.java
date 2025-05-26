@@ -14,6 +14,18 @@ public class CursorPageRequest {
     @Max(100)
     private int size;
 
+    public void setSortKey(String sortKey) {
+        this.sortKey = sortKey;
+    }
+
+    public void setCursor(String cursor) {
+        this.cursor = cursor;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
     public String getSortKey() {
         return sortKey;
     }
