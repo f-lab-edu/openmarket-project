@@ -1,9 +1,9 @@
 package oort.cloud.settlement.batch.chunk.processor;
 
 import lombok.extern.slf4j.Slf4j;
-import oort.cloud.settlement.batch.domain.OrderItemDto;
-import oort.cloud.settlement.batch.domain.SettlementDto;
-import oort.cloud.settlement.batch.domain.enums.SettlementStatus;
+import oort.cloud.settlement.batch.data.OrderItemDto;
+import oort.cloud.settlement.batch.data.SettlementDto;
+import oort.cloud.settlement.batch.data.enums.SettlementStatus;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +15,11 @@ import java.time.LocalDate;
 public class SettlementProcessor implements ItemProcessor<OrderItemDto, SettlementDto> {
     @Override
     public SettlementDto process(OrderItemDto item) throws Exception {
+        log.info("SettlementProcessor 시작...");
+        log.info("OrderItemDto : {}", item);
         int commissionAmount = item.getCommissionRate()
                 .multiply(BigDecimal.valueOf(item.getTotalPrice()))
                 .intValue();
-        log.info("SettlementProcessor 시작...");
-        log.info("OrderItemDto : {}", item);
         return SettlementDto.of(
                 item.getUserid(),
                 item.getTotalPrice() - commissionAmount,

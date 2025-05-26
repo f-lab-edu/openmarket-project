@@ -13,7 +13,7 @@ import java.util.Map;
 public class SettlementQueryProviderConfig {
 
     @Bean
-    public PagingQueryProvider settlementQueryProvider(DataSource dataSource) throws Exception {
+    public PagingQueryProvider selectOrderItemQueryProvider(DataSource dataSource) throws Exception {
         SqlPagingQueryProviderFactoryBean queryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
         queryProviderFactoryBean.setDataSource(dataSource);
         queryProviderFactoryBean.setSelectClause("""
@@ -31,8 +31,8 @@ public class SettlementQueryProviderConfig {
                                    INNER JOIN orders o ON oi.order_id = o.order_id
                 """);
         queryProviderFactoryBean.setWhereClause("""
-               WHERE oi.status = :status
-               AND oi.confirmed_at = :confirmedAt
+                WHERE oi.status = :status
+                AND oi.confirmed_at = :confirmedAt
                 """);
         queryProviderFactoryBean.setSortKeys(Map.of("order_item_id", Order.ASCENDING));
         return queryProviderFactoryBean.getObject();

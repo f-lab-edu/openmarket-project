@@ -1,6 +1,6 @@
-package oort.cloud.settlement.batch.domain;
+package oort.cloud.settlement.batch.data;
 
-import oort.cloud.settlement.batch.domain.enums.SettlementStatus;
+import oort.cloud.settlement.batch.data.enums.SettlementStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

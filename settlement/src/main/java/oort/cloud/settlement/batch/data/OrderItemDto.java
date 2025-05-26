@@ -1,4 +1,4 @@
-package oort.cloud.settlement.batch.domain;
+package oort.cloud.settlement.batch.data;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -9,7 +9,6 @@ public class OrderItemDto {
     private Integer totalPrice;
     private BigDecimal commissionRate;
     private Date confirmedAt;
-
 
     public void setUserid(Long userid) {
         this.userId = userid;

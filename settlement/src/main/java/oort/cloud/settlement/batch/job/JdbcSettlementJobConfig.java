@@ -2,8 +2,8 @@ package oort.cloud.settlement.batch.job;
 
 import lombok.extern.slf4j.Slf4j;
 import oort.cloud.settlement.batch.chunk.processor.SettlementProcessor;
-import oort.cloud.settlement.batch.domain.OrderItemDto;
-import oort.cloud.settlement.batch.domain.SettlementDto;
+import oort.cloud.settlement.batch.data.OrderItemDto;
+import oort.cloud.settlement.batch.data.SettlementDto;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -31,14 +31,14 @@ import java.util.Map;
 @Configuration
 @Slf4j
 public class JdbcSettlementJobConfig {
-    private final PagingQueryProvider settlementQueryProvider;
+    private final PagingQueryProvider selectOrderItemQueryProvider;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final SettlementProcessor settlementProcessor;
     private final DataSource dataSource;
 
-    public JdbcSettlementJobConfig(PagingQueryProvider settlementQueryProvider, JobRepository jobRepository, PlatformTransactionManager transactionManager, SettlementProcessor settlementProcessor, DataSource dataSource) {
-        this.settlementQueryProvider = settlementQueryProvider;
+    public JdbcSettlementJobConfig(PagingQueryProvider selectOrderItemQueryProvider, JobRepository jobRepository, PlatformTransactionManager transactionManager, SettlementProcessor settlementProcessor, DataSource dataSource) {
+        this.selectOrderItemQueryProvider = selectOrderItemQueryProvider;
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.settlementProcessor = settlementProcessor;
@@ -85,7 +85,7 @@ public class JdbcSettlementJobConfig {
                 .name("SettlementOrderItemReader")
                 .dataSource(dataSource)
                 .pageSize(10)
-                .queryProvider(settlementQueryProvider)
+                .queryProvider(selectOrderItemQueryProvider)
                 .parameterValues(queryParam)
                 .beanRowMapper(OrderItemDto.class)
                 .build();
