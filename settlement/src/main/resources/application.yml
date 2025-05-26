@@ -1,0 +1,22 @@
+spring:
+  main:
+    web-application-type: none
+  application:
+    name: settlement
+  datasource:
+    url: jdbc:mysql://localhost:13306/openmarket
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: admin@123
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+logging:
+  level:
+    org.springframework.batch.item.database: DEBUG
+
