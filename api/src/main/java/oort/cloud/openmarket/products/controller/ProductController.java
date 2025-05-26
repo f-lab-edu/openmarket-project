@@ -44,7 +44,7 @@ public class ProductController {
 
     @GetMapping("/v1/products/categories/{categoryId}")
     public ResponseEntity<CursorPageResponse<ProductsResponse>> getCategoryProductList(
-            @ModelAttribute CursorPageRequest request,
+            @ModelAttribute @Valid CursorPageRequest request,
             @PathVariable Long categoryId
             ){
         return ResponseEntity.ok()
