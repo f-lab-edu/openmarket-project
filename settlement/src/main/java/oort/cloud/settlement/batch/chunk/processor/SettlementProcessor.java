@@ -18,8 +18,9 @@ public class SettlementProcessor implements ItemProcessor<OrderItemDto, Settleme
         log.info("SettlementProcessor 시작...");
         log.info("OrderItemDto : {}", item);
         int commissionAmount = item.getCommissionRate()
-                .multiply(BigDecimal.valueOf(item.getTotalPrice()))
-                .intValue();
+                                    .multiply(BigDecimal.valueOf(item.getTotalPrice()))
+                                    .intValue();
+        //빌더로 리펙토링 필요
         return SettlementDto.of(
                 item.getUserid(),
                 item.getTotalPrice() - commissionAmount,

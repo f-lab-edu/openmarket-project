@@ -1,4 +1,4 @@
-package oort.cloud.settlement.batch.query;
+package oort.cloud.settlement.batch.query.settlement;
 
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.PagingQueryProvider;
@@ -19,7 +19,7 @@ public class SettlementQueryProviderConfig {
         queryProviderFactoryBean.setSelectClause("""
                 SELECT 
                         oi.order_item_id
-                        ,o.user_id AS userId
+                        ,p.user_id AS userId
                         ,oi.total_price
                         ,c.commission_rate AS commissionRate
                         ,oi.confirmed_at
@@ -28,7 +28,7 @@ public class SettlementQueryProviderConfig {
                 """
                 FROM order_item oi INNER JOIN product_categories pc ON oi.product_id = pc.product_id
                                    INNER JOIN categories c ON pc.category_id  = c.category_id
-                                   INNER JOIN orders o ON oi.order_id = o.order_id
+                                   INNER JOIN products p ON oi.product_id = p.product_id
                 """);
         queryProviderFactoryBean.setWhereClause("""
                 WHERE oi.status = :status

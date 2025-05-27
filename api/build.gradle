@@ -14,11 +14,10 @@ dependencies {
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api:3.1.0'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api:2.1.1'
 
-    // https://mvnrepository.com/artifact/de.huxhorn.sulky/de.huxhorn.sulky.ulid
-    implementation 'de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.3.0' //시간순 ULID 만들기 위해 추가
-
     implementation 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    implementation project(':common')
 }
 
 def querydslDir = "build/generated/querydsl"
