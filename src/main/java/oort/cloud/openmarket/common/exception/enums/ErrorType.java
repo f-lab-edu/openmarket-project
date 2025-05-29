@@ -17,6 +17,8 @@ public enum ErrorType{
     INVALID_SORT_VALUE("지원하지 않는 정렬 조건 입니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_EMAIL("이미 존재하는 이메일 입니다.", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD("비밀번호가 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    UNSUPPORTED_STATE("지원되지 않는 상태 입니다.", HttpStatus.BAD_REQUEST),
+    OUT_OF_STOCK("주문 상품의 재고가 부족합니다.", HttpStatus.BAD_REQUEST),
 
     // 404 NOT FOUND 클라이언트 에러,
     NOT_FOUND_RESOURCE("존재하지 않는 리소스 입니다.", HttpStatus.NOT_FOUND),
