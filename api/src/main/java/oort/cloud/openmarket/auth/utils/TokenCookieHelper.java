@@ -3,8 +3,8 @@ package oort.cloud.openmarket.auth.utils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import oort.cloud.openmarket.auth.utils.jwt.JwtProperties;
-import oort.cloud.openmarket.common.exception.auth.AuthenticationException;
 import oort.cloud.openmarket.common.exception.auth.InvalidTokenException;
+import oort.cloud.openmarket.common.exception.auth.UnauthorizedAccessException;
 import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +32,7 @@ public class TokenCookieHelper {
     }
 
     public String extractRefreshTokenFromCookies(Cookie[] cookies){
-        if(cookies == null || cookies.length == 0) throw new AuthenticationException(ErrorType.UNAUTHORIZED_ACCESS);
+        if(cookies == null || cookies.length == 0) throw new UnauthorizedAccessException();
 
         return Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN_COOKIE_NAME))

@@ -8,7 +8,7 @@ import java.security.Key;
 
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
-    private static final int MAX_ACCESS_MINUTES = 30;
+    private static final int MAX_ACCESS_MINUTES = 5;
     private static final int MAX_REFRESH_DAYS = 60;
     private final int refreshTokenExpiredDay;
     private final int accessTokenExpiredMinutes;

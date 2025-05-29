@@ -9,6 +9,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: admin@123
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6380
   jpa:
     hibernate:
       ddl-auto: none
@@ -19,7 +23,7 @@ spring:
         use_sql_comments: true
 jwt:
   refresh-token-expired-day: 30
-  access-token-expired-minutes: 30
+  access-token-expired-minutes: 5
   algorithm: HS256
 external:
   payment:

@@ -9,7 +9,6 @@ public class OrderItemDto {
     private Integer totalPrice;
     private BigDecimal commissionRate;
     private Date confirmedAt;
-
     public void setUserid(Long userid) {
         this.userId = userid;
     }

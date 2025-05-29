@@ -27,13 +27,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 
-class TokenServiceTest {
+class TokenDataBaseServiceTest {
     private RefreshTokenRepository refreshTokenRepository;
     private JwtProperties jwtProperties;
     private JwtManager jwtManager;
     private UserService userService;
 
-    private TokenService tokenService;
+    private TokenDataBaseService tokenService;
 
     @BeforeEach
     void setup() {
@@ -42,7 +42,7 @@ class TokenServiceTest {
         jwtManager = mock(JwtManager.class);
         userService = mock(UserService.class);
 
-        tokenService = new TokenService(refreshTokenRepository, jwtProperties, jwtManager, userService);
+        tokenService = new TokenDataBaseService(refreshTokenRepository, jwtProperties, jwtManager, userService);
     }
 
     @Test
