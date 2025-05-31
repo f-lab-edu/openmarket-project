@@ -21,14 +21,14 @@ public class ProductController {
         this.productsService = productsService;
     }
 
-    @PostMapping("/v1/products")
+    @PostMapping("/v1/seller/products")
     public ResponseEntity<CreateProductResponse> createProduct(@RequestBody @Valid ProductRequest request,
                                                                @AccessToken AccessTokenPayload payload){
         return ResponseEntity.ok()
                 .body(productsService.createProduct(payload.getUserId(), request));
     }
 
-    @PutMapping("/v1/products/{productId}")
+    @PutMapping("/v1/seller/products/{productId}")
     public ResponseEntity<Void> updateProduct(@PathVariable Long productId,
                                               @RequestBody @Valid ProductRequest request,
                                               @AccessToken AccessTokenPayload payload){
@@ -36,7 +36,7 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/v1/products/{productId}")
+    @DeleteMapping("/v1/admin/products/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
         productsService.deleteProduct(productId);
         return ResponseEntity.ok().build();
@@ -46,7 +46,7 @@ public class ProductController {
     public ResponseEntity<CursorPageResponse<ProductsResponse>> getCategoryProductList(
             @ModelAttribute CursorPageRequest request,
             @PathVariable Long categoryId
-            ){
+    ){
         return ResponseEntity.ok()
                 .body(productsService.getProductsByCategoryCursorPaging(categoryId, request));
     }
