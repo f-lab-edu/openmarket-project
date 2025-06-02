@@ -14,7 +14,7 @@ public class FilterConfig {
     public FilterRegistrationBean<JwtAuthFilter> jwtFilterRegistrationBean(JwtAuthFilter jwtAuthFilter) {
         FilterRegistrationBean<JwtAuthFilter> frb = new FilterRegistrationBean<>();
         frb.setFilter(jwtAuthFilter);
-        frb.addUrlPatterns("/v1/user/*", "/v1/auth/logout", "/v1/order/*", "/v1/admin/*");
+        frb.addUrlPatterns("/v1/user/*", "/v1/auth/logout", "/v1/order/*", "/v1/admin/*", "/v1/seller/*");
         frb.setOrder(1);
         return frb;
     }

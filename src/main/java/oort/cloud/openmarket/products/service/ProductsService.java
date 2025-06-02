@@ -10,7 +10,6 @@ import oort.cloud.openmarket.common.paging.cusor.Cursor;
 import oort.cloud.openmarket.common.paging.cusor.CursorPageRequest;
 import oort.cloud.openmarket.common.paging.cusor.CursorPageResponse;
 import oort.cloud.openmarket.common.paging.cusor.CursorUtil;
-import oort.cloud.openmarket.order.controller.request.OrderItemCreateRequest;
 import oort.cloud.openmarket.products.controller.request.ProductRequest;
 import oort.cloud.openmarket.products.controller.response.CreateProductResponse;
 import oort.cloud.openmarket.products.controller.response.ProductDetailResponse;
@@ -137,10 +136,7 @@ public class ProductsService {
                 .orElseThrow(() -> new NotFoundResourceException("조회된 상품이 없습니다."));
     }
 
-    public List<Products> getProductListByIds(List<OrderItemCreateRequest> requests){
-        List<Long> ids = requests.stream()
-                .map(OrderItemCreateRequest::getProductId)
-                .toList();
+    public List<Products> getProductListByIds(List<Long> ids){
         return productsRepository.findAllById(ids);
     }
 }

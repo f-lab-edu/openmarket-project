@@ -41,16 +41,25 @@ public class OrderService {
         Long addressId = request.getAddressId();
         Address address = user.findAddress(addressId);
 
-        //OrderItem 생성
+        // 주문 상품 요청 가져오기
         List<OrderItemCreateRequest> orderItemRequests = request.getOrderItemRequests();
-        Map<Long, Products> products = productsService.getProductListByIds(orderItemRequests)
+        // 주문상품 요청 -> 상품 ID 추출
+        List<Long> requestProductIds = orderItemRequests
+                .stream().map(OrderItemCreateRequest::getProductId).toList();
+        // 상품 조회
+        Map<Long, Products> products = productsService.getProductListByIds(requestProductIds)
                 .stream().collect(Collectors.toMap(Products::getProductId, Function.identity()));
+
+        // 주문 요청 상품 검증
+        List<Long> notFoundProducts = requestProductIds.stream()
+                .filter(id -> !products.containsKey(id)).toList();
+
+        if(!notFoundProducts.isEmpty()){
+            throw new NotFoundResourceException("주문 상품을 찾을 수 없습니다. [상품 ID] : " + notFoundProducts);
+        }
 
         List<OrderItem> orderItems = orderItemRequests.stream().map(req -> {
             Long productId = req.getProductId();
-            if (!products.containsKey(productId)) {
-                throw new NotFoundResourceException("조회된 상품이 없습니다.");
-            }
             return OrderItem.createOrderItem(products.get(productId), req.getQuantity());
         }).toList();
 
@@ -62,16 +71,6 @@ public class OrderService {
                 request.getReceiverPhone(),
                 orderItems);
         orderRepository.save(order);
-        return new OrderCreateResponse(order.getOrderId(), order.getExternalOrderId());
-    }
-
-    public Order findByOrderId(Long orderId){
-        return orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundResourceException("조회된 주문이 없습니다."));
-    }
-
-    public Order findByExternalOrderId(String externalOrderId){
-        return orderRepository.findByExternalOrderId(externalOrderId)
-                .orElseThrow(() -> new NotFoundResourceException("조회된 주문이 없습니다."));
+        return new OrderCreateResponse(order.getOrderId());
     }
 }
