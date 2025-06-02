@@ -6,7 +6,8 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import oort.cloud.openmarket.common.exception.business.ExternalApiException;
 import oort.cloud.openmarket.common.exception.enums.ErrorType;
-import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
+import oort.cloud.openmarket.payment.service.request.PaymentApproveRequest;
+import oort.cloud.openmarket.payment.service.request.PaymentCancelRequest;
 import oort.cloud.openmarket.payment.service.response.ExternalApiErrorResponse;
 import oort.cloud.openmarket.payment.service.response.SimplePaymentResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +38,6 @@ public class SimplePaymentClient {
 
     @PostConstruct
     void init(){
-        simplePaymentUrl += "/test/payment";
         restClient = RestClient.create(simplePaymentUrl);
     }
 
@@ -51,10 +51,29 @@ public class SimplePaymentClient {
             maxAttempts = 3,
             backoff = @Backoff(value = 1000, multiplier = 3)
     )
-    public SimplePaymentResponse approvePayment(PaymentApiRequest request){
+    public SimplePaymentResponse approve(PaymentApproveRequest request){
         try {
             return restClient
                     .post()
+                    .body(request)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<SimplePaymentResponse>() {});
+        }catch (HttpClientErrorException e){
+            throw createPaymentApiException(e);
+        }
+    }
+
+    @Retryable(
+            retryFor = HttpServerErrorException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(value = 1000, multiplier = 3)
+    )
+    public SimplePaymentResponse cancel(String paymentKey, PaymentCancelRequest request) {
+        try {
+            return restClient
+                    .post()
+                    .uri(uriBuilder -> uriBuilder.path("/" + paymentKey).build())
                     .body(request)
                     .contentType(MediaType.APPLICATION_JSON)
                     .retrieve()
@@ -69,7 +88,12 @@ public class SimplePaymentClient {
      *       추 후 별도의 처리가 필요할 경우 수정이 필요
      */
     @Recover
-    public SimplePaymentResponse approvePaymentRecover(HttpServerErrorException e, PaymentApiRequest request) {
+    public SimplePaymentResponse approvePaymentRecover(HttpServerErrorException e, PaymentApproveRequest request) {
+        throw createPaymentApiException(e);
+    }
+
+    @Recover
+    public SimplePaymentResponse cancelPaymentRecover(HttpServerErrorException e, String paymentKey, PaymentCancelRequest request) {
         throw createPaymentApiException(e);
     }
 

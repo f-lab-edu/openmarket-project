@@ -1,7 +1,7 @@
 package oort.cloud.openmarket.order.entity;
 
 import jakarta.persistence.*;
-import oort.cloud.openmarket.common.exception.business.UnsupportedStatusException;
+import oort.cloud.openmarket.common.exception.business.NotAllowedActionException;
 import oort.cloud.openmarket.order.enums.OrderItemStatus;
 import oort.cloud.openmarket.products.entity.Products;
 
@@ -42,6 +42,9 @@ public class OrderItem {
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     protected OrderItem(){}
 
     public static OrderItem createOrderItem(
@@ -54,18 +57,25 @@ public class OrderItem {
         orderItem.price = product.getPrice();
         orderItem.totalPrice = product.getPrice() * quantity;
         orderItem.status = OrderItemStatus.ORDERED;
+        orderItem.createdAt = LocalDateTime.now();
         product.removeStock(quantity);
         return orderItem;
     }
 
     public void cancel(){
         if(!status.isCancellable()){
-            throw new UnsupportedStatusException();
+            throw new NotAllowedActionException("배송중인 상품이 있을 경우 주문 취소가 불가능 합니다.");
         }
         product.addStock(quantity);
         this.setStatus(OrderItemStatus.CANCELLED);
     }
 
+    public void shipping(){
+        if(!status.isShippable()){
+            throw new NotAllowedActionException("배송 할 수 없는 주문상품 입니다.");
+        }
+        this.setStatus(OrderItemStatus.SHIPPED);
+    }
 
     public void setOrder(Order order) {
         this.order = order;
@@ -123,6 +133,10 @@ public class OrderItem {
         return confirmedAt;
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -148,6 +162,7 @@ public class OrderItem {
                 ", status=" + status +
                 ", deliveredAt=" + deliveredAt +
                 ", confirmedAt=" + confirmedAt +
+                ", createdAt=" + createdAt +
                 '}';
     }
 }

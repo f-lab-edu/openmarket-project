@@ -1,12 +1,17 @@
 package oort.cloud.openmarket.order.service;
 
+import oort.cloud.openmarket.common.exception.business.NotAllowedActionException;
 import oort.cloud.openmarket.common.exception.business.OutOfStockException;
 import oort.cloud.openmarket.data.OrderCreateRequestTest;
 import oort.cloud.openmarket.data.OrderItemCreateRequestTest;
+import oort.cloud.openmarket.order.controller.reponse.OrderCancelResponse;
+import oort.cloud.openmarket.order.controller.request.OrderCancelRequest;
 import oort.cloud.openmarket.order.controller.request.OrderItemCreateRequest;
 import oort.cloud.openmarket.order.entity.Order;
 import oort.cloud.openmarket.order.entity.OrderItem;
+import oort.cloud.openmarket.order.enums.OrderStatus;
 import oort.cloud.openmarket.order.repository.OrderRepository;
+import oort.cloud.openmarket.payment.service.PaymentService;
 import oort.cloud.openmarket.products.entity.Products;
 import oort.cloud.openmarket.products.service.ProductsService;
 import oort.cloud.openmarket.user.entity.Address;
@@ -23,8 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -38,6 +46,8 @@ class OrderServiceTest {
     private UserService userService;
     @Mock
     private ProductsService productsService;
+    @Mock
+    private PaymentService paymentService;
     @InjectMocks
     private OrderService orderService;
 
@@ -57,6 +67,7 @@ class OrderServiceTest {
         mockUser = mock(Users.class);
         mockAddress = mock(Address.class);
 
+
         product1 = Products.create("test", mockUser, "test", product1Price, product1Stock); // 실제 생성자 대신 setter 또는 reflection으로 필드 채워도 무관
         ReflectionTestUtils.setField(product1, "productId", 100L);
         product2 = Products.create("test", mockUser, "test", product2Price, product2Stock); // 실제 생성자 대신 setter 또는 reflection으로 필드 채워도 무관
@@ -69,16 +80,13 @@ class OrderServiceTest {
         //given
         List<OrderItemCreateRequest> orderItems = List.of(new OrderItemCreateRequestTest(100L, 10),
                 new OrderItemCreateRequestTest(200L, 1));
-        List<Long> productsId = orderItems.stream()
-                .map(OrderItemCreateRequest::getProductId).toList();
-
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
-                orderItems, 10L, "test", "12312341234");
+                orderItems,10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
         when(mockUser.findAddress(10L)).thenReturn(mockAddress);
-        when(productsService.getProductListByIds(productsId)).thenReturn(List.of(product1, product2));
+        when(productsService.getProductListByIds(orderItems)).thenReturn(List.of(product1, product2));
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -101,15 +109,13 @@ class OrderServiceTest {
         //given
         List<OrderItemCreateRequest> orderItems = List.of(new OrderItemCreateRequestTest(100L, 100),
                 new OrderItemCreateRequestTest(200L, 12));
-        List<Long> productsId = orderItems.stream()
-                .map(OrderItemCreateRequest::getProductId).toList();
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
                 orderItems, 10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
         when(mockUser.findAddress(10L)).thenReturn(mockAddress);
-        when(productsService.getProductListByIds(productsId)).thenReturn(List.of(product1, product2));
+        when(productsService.getProductListByIds(orderItems)).thenReturn(List.of(product1, product2));
 
         assertThrows(OutOfStockException.class, () -> orderService.createOrder(1L, orderReq));
     }
@@ -120,15 +126,13 @@ class OrderServiceTest {
         //given
         List<OrderItemCreateRequest> orderItems = List.of(new OrderItemCreateRequestTest(100L, 10),
                 new OrderItemCreateRequestTest(200L, 1));
-        List<Long> productsId = orderItems.stream()
-                .map(OrderItemCreateRequest::getProductId).toList();
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
                 orderItems, 10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
         when(mockUser.findAddress(10L)).thenReturn(mockAddress);
-        when(productsService.getProductListByIds(productsId)).thenReturn(List.of(product1, product2));
+        when(productsService.getProductListByIds(orderItems)).thenReturn(List.of(product1, product2));
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -163,15 +167,13 @@ class OrderServiceTest {
         List<OrderItemCreateRequest> orderItems = List.of(
                 new OrderItemCreateRequestTest(100L, product1OrderQuantity),
                 new OrderItemCreateRequestTest(200L, product2OrderQuantity));
-        List<Long> productsId = orderItems.stream()
-                .map(OrderItemCreateRequest::getProductId).toList();
         OrderCreateRequestTest orderReq = new OrderCreateRequestTest(
-                orderItems, 10L, "test", "12312341234");
+                orderItems,10L, "test", "12312341234");
 
         //when
         when(userService.findUserEntityById(1L)).thenReturn(mockUser);
         when(mockUser.findAddress(10L)).thenReturn(mockAddress);
-        when(productsService.getProductListByIds(productsId)).thenReturn(List.of(product1, product2));
+        when(productsService.getProductListByIds(orderItems)).thenReturn(List.of(product1, product2));
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -199,5 +201,53 @@ class OrderServiceTest {
         assertThat(savedOrderItems)
                 .extracting(orderItem -> orderItem.getProduct().getStock())
                 .containsExactlyInAnyOrder(expectProduct1Stock, expectProduct2Stock);
+    }
+
+    @Test
+    void success_order_cancel(){
+        //given
+        Long orderId = 1L;
+        String externalOrderId = UUID.randomUUID().toString();
+        Order mockOrder = mock(Order.class);
+        List<OrderItem> mockOrderItems = List.of(mock(OrderItem.class),mock(OrderItem.class));
+        OrderCancelRequest request = mock(OrderCancelRequest.class);
+
+        //when
+        when(request.getReason()).thenReturn("단순 변심");
+        when(mockOrder.getExternalOrderId()).thenReturn(externalOrderId);
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+        when(mockOrder.getOrderItems()).thenReturn(mockOrderItems);
+
+        OrderCancelResponse cancelResponse = orderService.cancel(orderId, request);
+
+        //then
+        verify(orderRepository).findById(orderId);
+        verify(paymentService).cancel(externalOrderId, "단순 변심");
+        verify(mockOrder).setStatus(OrderStatus.CANCELLED);
+        mockOrderItems.forEach(orderItem -> verify(orderItem).cancel());
+
+        assertThat(orderId).isEqualTo(cancelResponse.getOrderId());
+    }
+
+    @Test
+    void fail_order_cancel(){
+        //given
+        Long orderId = 1L;
+        Order mockOrder = mock(Order.class);
+        OrderItem mockOrderItem = mock(OrderItem.class);
+        OrderCancelRequest request = mock(OrderCancelRequest.class);
+
+        //when
+        doThrow(new NotAllowedActionException("배송중인 상품이 있을 경우 주문 취소가 불가능 합니다."))
+                .when(mockOrderItem).cancel();
+        when(mockOrder.getOrderItems()).thenReturn(List.of(mockOrderItem));
+        when(orderRepository.findById(orderId)).thenReturn(Optional.of(mockOrder));
+
+        assertThatThrownBy(() -> orderService.cancel(orderId, request))
+                .isInstanceOf(NotAllowedActionException.class);
+
+        verify(paymentService, never()).cancel(any(), anyString());
+        verify(mockOrder, never()).setStatus(OrderStatus.CANCELLED);
+
     }
 }

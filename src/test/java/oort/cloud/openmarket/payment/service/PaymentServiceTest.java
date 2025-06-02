@@ -4,61 +4,57 @@ import oort.cloud.openmarket.common.exception.business.ExternalApiException;
 import oort.cloud.openmarket.common.exception.enums.ErrorType;
 import oort.cloud.openmarket.data.PaymentCreateRequestTest;
 import oort.cloud.openmarket.order.entity.Order;
-import oort.cloud.openmarket.order.service.OrderService;
 import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
+import oort.cloud.openmarket.payment.controller.response.PaymentCreateResponse;
 import oort.cloud.openmarket.payment.entity.Payment;
+import oort.cloud.openmarket.payment.enums.PaymentStatus;
 import oort.cloud.openmarket.payment.repository.PaymentRepository;
-import oort.cloud.openmarket.payment.service.data.PaymentDto;
+import oort.cloud.openmarket.payment.service.data.PaymentResponse;
 import oort.cloud.openmarket.payment.service.processor.PaymentProcessor;
-import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
+import oort.cloud.openmarket.payment.service.request.PaymentApproveRequest;
+import oort.cloud.openmarket.payment.service.response.SimplePaymentResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 class PaymentServiceTest {
-    private PaymentProcessor paymentProcessor;
-    private OrderService orderService;
+    private PaymentProcessor<SimplePaymentResponse> paymentProcessor;
     private PaymentRepository paymentRepository;
     private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
         paymentProcessor = mock(PaymentProcessor.class);
-        orderService = mock(OrderService.class);
         paymentRepository = mock(PaymentRepository.class);
-        paymentService = new PaymentService(paymentProcessor, orderService, paymentRepository);
+        paymentService = new PaymentService(paymentProcessor, paymentRepository);
     }
 
     @Test
     @DisplayName("중복된 externalOrderId 요청일 경우 기존 paymentId 반환")
     void fail_exist_external_order_id() {
         // given
-        String externalOrderId = "ulid-1234";
-        int amount = 10000;
         Long savedPaymentId = 123L;
-
-        PaymentCreateRequest request = new PaymentCreateRequestTest(externalOrderId, amount);
+        Order mockOrder = mock(Order.class);
         Payment savedPayment = mock(Payment.class);
 
+        when(mockOrder.getExternalOrderId()).thenReturn("ulid-1234");
         when(savedPayment.getPaymentId()).thenReturn(savedPaymentId);
         when(paymentRepository.findByExternalOrderId("ulid-1234"))
                 .thenReturn(Optional.of(savedPayment));
 
-
         // when
-        Long result = paymentService.processPayment(request).getPaymentId();
+        PaymentCreateResponse result = paymentService.processPayment(mockOrder);
 
         // then
-        assertThat(result).isEqualTo(savedPaymentId);
-        verify(paymentProcessor, never()).process(any());
+        assertThat(result.getPaymentId()).isEqualTo(savedPaymentId);
+        verify(paymentProcessor, never()).approve(any());
         verify(paymentRepository, never()).save(any());
     }
 
@@ -69,35 +65,37 @@ class PaymentServiceTest {
         String externalOrderId = "ulid-new";
         int amount = 15000;
         Long newPaymentId = 456L;
-
+        Order mockOrder = mock(Order.class);
         PaymentCreateRequest request = new PaymentCreateRequestTest(externalOrderId, amount);
         Order order = mock(Order.class);
 
+        PaymentResponse<SimplePaymentResponse> response = mock(PaymentResponse.class);
+        SimplePaymentResponse simpleResponse = mock(SimplePaymentResponse.class);
+
+        when(response.getData()).thenReturn(simpleResponse);
+        when(simpleResponse.getExternalOrderId()).thenReturn("external-order-id");
+        when(simpleResponse.getPaymentKey()).thenReturn("pay-key-123");
+        when(simpleResponse.getMethod()).thenReturn("카드");
+        when(simpleResponse.getTotalAmount()).thenReturn(10000);
+        when(simpleResponse.getStatus()).thenReturn(PaymentStatus.DONE);
+        when(simpleResponse.getApprovedAt()).thenReturn(LocalDateTime.now());
+        when(simpleResponse.getRequestedAt()).thenReturn(LocalDateTime.now().minusMinutes(1));
+
         when(paymentRepository.findByExternalOrderId(externalOrderId))
                 .thenReturn(Optional.empty());
-        when(orderService.findByExternalOrderId(externalOrderId)).thenReturn(order);
 
-        PaymentDto paymentDto = new PaymentDto.Builder()
-                .orderId(externalOrderId)
-                .paymentKey(UUID.randomUUID().toString())
-                .method("카드")
-                .totalAmount(amount)
-                .status("DONE")
-                .requestedAt(LocalDateTime.now())
-                .approvedAt(LocalDateTime.now())
-                .build();
-        when(paymentProcessor.process(any(PaymentApiRequest.class))).thenReturn(paymentDto);
+        when(paymentProcessor.approve(any(PaymentApproveRequest.class))).thenReturn(response);
 
         Payment savedPayment = mock(Payment.class);
         when(savedPayment.getPaymentId()).thenReturn(newPaymentId);
         when(paymentRepository.save(any())).thenReturn(savedPayment);
 
         // when
-        Long result = paymentService.processPayment(request).getPaymentId();
+        Long result = paymentService.processPayment(order).getPaymentId();
 
         // then
         assertThat(result).isEqualTo(newPaymentId);
-        verify(paymentProcessor).process(any(PaymentApiRequest.class));
+        verify(paymentProcessor).approve(any(PaymentApproveRequest.class));
         verify(paymentRepository).save(any(Payment.class));
     }
 
@@ -113,13 +111,12 @@ class PaymentServiceTest {
         when(paymentRepository.findByExternalOrderId(externalOrderId))
                 .thenReturn(Optional.empty());
         Order order = mock(Order.class);
-        when(orderService.findByExternalOrderId(externalOrderId)).thenReturn(order);
 
-        when(paymentProcessor.process(any(PaymentApiRequest.class))).thenThrow(
+        when(paymentProcessor.approve(any(PaymentApproveRequest.class))).thenThrow(
                 new ExternalApiException(ErrorType.INTERNAL_ERROR, "외부 API 결제 에러"));
 
         // when
-        assertThatThrownBy(() -> paymentService.processPayment(request)).isInstanceOf(ExternalApiException.class);
+        assertThatThrownBy(() -> paymentService.processPayment(order)).isInstanceOf(ExternalApiException.class);
 
         // then
         verify(paymentRepository, never()).save(any());

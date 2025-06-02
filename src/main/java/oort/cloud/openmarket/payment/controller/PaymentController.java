@@ -1,11 +1,11 @@
 package oort.cloud.openmarket.payment.controller;
 
-import oort.cloud.openmarket.payment.controller.request.PaymentCreateRequest;
-import oort.cloud.openmarket.payment.controller.response.PaymentCreateResponse;
 import oort.cloud.openmarket.payment.controller.response.PaymentDetailResponse;
 import oort.cloud.openmarket.payment.service.PaymentService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class PaymentController {
@@ -13,13 +13,6 @@ public class PaymentController {
 
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
-    }
-
-    @PostMapping("/v1/payment/approve")
-    public ResponseEntity<PaymentCreateResponse> approvePayment(@RequestBody PaymentCreateRequest request){
-        return ResponseEntity.ok().body(
-                paymentService.processPayment(request)
-        );
     }
 
     @GetMapping("/v1/payment/{paymentId}")
@@ -30,4 +23,5 @@ public class PaymentController {
                         paymentService.getPaymentDetail(paymentId)
                 );
     }
+
 }

@@ -19,8 +19,7 @@ public class Payment {
     private String externalOrderId;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", unique = true, nullable = false)
     private Order order;
 
     @Column(name = "payment_key")
@@ -43,6 +42,12 @@ public class Payment {
     @Column(name = "requested_at")
     private LocalDateTime requestedAt;
 
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
+    @Column(name = "cancel_reason")
+    private String cancelReason;
+
     protected Payment(){}
 
     public static Payment createPayment(
@@ -51,7 +56,7 @@ public class Payment {
             String paymentKey,
             String paymentMethod,
             int amount,
-            String status,
+            PaymentStatus status,
             LocalDateTime approvedAt,
             LocalDateTime requestedAt){
         Payment payment = new Payment();
@@ -60,7 +65,7 @@ public class Payment {
         payment.paymentKey = paymentKey;
         payment.paymentMethod = PaymentMethod.fromLabel(paymentMethod);
         payment.amount = amount;
-        payment.status = PaymentStatus.valueOf(status);
+        payment.status = status;
         payment.approvedAt = approvedAt;
         payment.requestedAt = requestedAt;
         return payment;
@@ -78,6 +83,8 @@ public class Payment {
                 ", status=" + status +
                 ", approvedAt=" + approvedAt +
                 ", requestedAt=" + requestedAt +
+                ", canceledAt=" + canceledAt +
+                ", cancelReason='" + cancelReason + '\'' +
                 '}';
     }
 
@@ -129,4 +136,25 @@ public class Payment {
     public String getExternalOrderId() {
         return externalOrderId;
     }
+
+    public LocalDateTime getCanceledAt(){
+        return canceledAt;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setStatus(PaymentStatus status) {
+        this.status = status;
+    }
+
+    public void setCanceledAt(LocalDateTime canceledAt){
+        this.canceledAt = canceledAt;
+    }
+
+    public void setCancelReason(String cancelReason){
+        this.cancelReason = cancelReason;
+    }
+
 }

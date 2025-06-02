@@ -1,8 +1,9 @@
 package oort.cloud.openmarket.payment.service.processor;
 
 import oort.cloud.openmarket.payment.service.client.SimplePaymentClient;
-import oort.cloud.openmarket.payment.service.data.PaymentDto;
-import oort.cloud.openmarket.payment.service.request.PaymentApiRequest;
+import oort.cloud.openmarket.payment.service.data.PaymentResponse;
+import oort.cloud.openmarket.payment.service.request.PaymentApproveRequest;
+import oort.cloud.openmarket.payment.service.request.PaymentCancelRequest;
 import oort.cloud.openmarket.payment.service.response.SimplePaymentResponse;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Primary
-public class SimplePaymentProcessor implements PaymentProcessor{
+public class SimplePaymentProcessor implements PaymentProcessor<SimplePaymentResponse>{
     private final SimplePaymentClient simplePaymentClient;
 
     public SimplePaymentProcessor(SimplePaymentClient simplePaymentClient) {
@@ -20,17 +21,15 @@ public class SimplePaymentProcessor implements PaymentProcessor{
     }
 
     @Override
-    public PaymentDto process(PaymentApiRequest request) {
-        SimplePaymentResponse simplePaymentResponse = simplePaymentClient.approvePayment(request);
-        return new PaymentDto.Builder()
-                .paymentKey(simplePaymentResponse.getPaymentKey())
-                .orderId(simplePaymentResponse.getExternalOrderId())
-                .status(simplePaymentResponse.getStatus())
-                .approvedAt(simplePaymentResponse.getApprovedAt())
-                .requestedAt(simplePaymentResponse.getRequestedAt())
-                .totalAmount(simplePaymentResponse.getTotalAmount())
-                .method(simplePaymentResponse.getMethod())
-                .build();
+    public PaymentResponse<SimplePaymentResponse> approve(PaymentApproveRequest request) {
+        SimplePaymentResponse response = simplePaymentClient.approve(request);
+        return new PaymentResponse<>(response);
+    }
+
+    @Override
+    public PaymentResponse<SimplePaymentResponse> cancel(String paymentKey, PaymentCancelRequest request) {
+        SimplePaymentResponse response = simplePaymentClient.cancel(paymentKey, request);
+        return new PaymentResponse<>(response);
     }
 
 }
