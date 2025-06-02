@@ -7,6 +7,8 @@
 - Gradle
 - JPA / Spring Data JPA
 - MySQL 8.0
+- Spring Batch 5.2.2
+- Redis 8.0.1
 
 # 설계문서
 링크 : https://docs.google.com/spreadsheets/d/14mc0s9Av3yyBLrJtK6BW9OSPkok_W1L3Df7XEGaPN5Y/edit?usp=sharing

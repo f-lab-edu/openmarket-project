@@ -1,4 +1,5 @@
 rootProject.name = 'openmarket'
 include 'api'
 include 'settlement'
+include 'common'
 

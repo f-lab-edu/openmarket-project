@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import oort.cloud.settlement.batch.chunk.processor.SettlementProcessor;
 import oort.cloud.settlement.batch.data.OrderItemDto;
 import oort.cloud.settlement.batch.data.SettlementDto;
+import oort.cloud.settlement.batch.query.settlement.WriteSettlementSqlQuery;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -17,32 +18,43 @@ import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuild
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryListener;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.sql.SQLTimeoutException;
 import java.time.LocalDate;
 import java.util.Map;
 
 /**
- *  실행 커맨드 : ./gradlew :settlement:bootRun --args="--job.name=jdbcSettlementJob confirmedAt=2025-05-20 status=COMPLETED run.id=$(date +%s)"
+ *  실행 커맨드 : ./gradlew :settlement:bootRun --args="--job.name=jdbcSettlementJob confirmedAt=2025-05-20 status=CONFIRMED run.id=$(date +%s)"
  *
+ *  일 단위 구매확정 주문상품에 대한 정산 배치
+ *  1. 어제 날짜 기준 구매확정(Confirmed) 상태인 주문상품 조회
+ *  2. 해당 주문 상품의 카테고리에 해당하는 수수료를 적용하여 수수료 금액과 실 지급액 계산
+ *  3. 정산(Settlement) 테이블에 데이터 저장
  */
 
 @Configuration
 @Slf4j
 public class JdbcSettlementJobConfig {
-    private final PagingQueryProvider selectOrderItemQueryProvider;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final SettlementProcessor settlementProcessor;
     private final DataSource dataSource;
+    private final PagingQueryProvider selectOrderItemQueryProvider;
+    private final SettlementProcessor settlementProcessor;
+    private final StepExecutionListener settlementStepListener;
+    private final RetryListener createSettlementRetryListener;
 
-    public JdbcSettlementJobConfig(PagingQueryProvider selectOrderItemQueryProvider, JobRepository jobRepository, PlatformTransactionManager transactionManager, SettlementProcessor settlementProcessor, DataSource dataSource) {
+    public JdbcSettlementJobConfig(PagingQueryProvider selectOrderItemQueryProvider, JobRepository jobRepository, PlatformTransactionManager transactionManager, SettlementProcessor settlementProcessor, DataSource dataSource, StepExecutionListener settlementStepListener, RetryListener createSettlementRetryListener) {
         this.selectOrderItemQueryProvider = selectOrderItemQueryProvider;
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.settlementProcessor = settlementProcessor;
         this.dataSource = dataSource;
+        this.settlementStepListener = settlementStepListener;
+        this.createSettlementRetryListener = createSettlementRetryListener;
     }
 
     @Bean
@@ -59,19 +71,17 @@ public class JdbcSettlementJobConfig {
                 .reader(settlementOrderItemReader(null, null))
                 .processor(settlementProcessor)
                 .writer(createSettlementWriter())
-                .listener(new StepExecutionListener() {
-                    @Override
-                    public void beforeStep(StepExecution stepExecution) {
-                        log.info("jdbcSettlementStep 실행 중...");
-                    }
-
-                    @Override
-                    public ExitStatus afterStep(StepExecution stepExecution) {
-                        log.info("Read Count : {}", stepExecution.getReadCount());
-                        log.info("write Count : {}", stepExecution.getWriteCount());
-                        return ExitStatus.COMPLETED;
-                    }
-                })
+                .listener(settlementStepListener)
+                .faultTolerant()
+                .retry(SQLTimeoutException.class)
+                .retryLimit(3)
+                .processorNonTransactional() // 이미 처리된 Item에 대해서는 캐시를 적용하여 다시 진행하지 않음
+                .listener(createSettlementRetryListener)
+                .backOffPolicy(new ExponentialBackOffPolicy(){{
+                    setInitialInterval(1000L);
+                    setMultiplier(3);
+                    setMaxInterval(10000L);
+                }})
                 .build();
     }
 
@@ -82,7 +92,7 @@ public class JdbcSettlementJobConfig {
                                                         @Value("#{jobParameters[status]}") String status) {
         Map<String, Object> queryParam = Map.of("confirmedAt", confirmedAtParam, "status", status);
         return new JdbcPagingItemReaderBuilder<OrderItemDto>()
-                .name("SettlementOrderItemReader")
+                .name("settlementOrderItemReader")
                 .dataSource(dataSource)
                 .pageSize(10)
                 .queryProvider(selectOrderItemQueryProvider)
@@ -95,12 +105,9 @@ public class JdbcSettlementJobConfig {
     public JdbcBatchItemWriter<SettlementDto> createSettlementWriter() {
         return new JdbcBatchItemWriterBuilder<SettlementDto>()
                 .dataSource(dataSource)
-                .sql("""
-                    INSERT INTO settlement
-                    (user_id, order_item_id, settlement_amount, commission_amount, scheduled_at, paid_at, status, created_at)
-                    VALUES(:userId, :orderItemId, :settlementAmount, :commissionAmount, :scheduledAt, :paidAt, :status, :createdAt);
-                    """)
+                .sql(WriteSettlementSqlQuery.INSERT.getQuery())
                 .beanMapped()
                 .build();
     }
+
 }
