@@ -34,4 +34,5 @@ public class OrderCreateRequest {
     public String getReceiverPhone() {
         return receiverPhone;
     }
+
 }
